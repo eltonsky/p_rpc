@@ -15,8 +15,8 @@ using namespace std;
 template <typename T> class BlockQueue
 {
     unsigned max_size = 0;
-    int prod_wait_time = 200;
-    int cons_wait_time = 200;
+    int prod_wait_time = 1000;
+    int cons_wait_time = 1000;
 
     std::queue<T> queue_;
     std::mutex mutex_;
@@ -40,7 +40,7 @@ public:
     {
         unilock l(mutex_);
 
-        std::cout<<"push: queue size "<<queue_.size()<<", max_size "<<max_size<< std::endl;
+        std::cout<<"try_push: queue size "<<queue_.size()<<", max_size "<<max_size<< std::endl;
 
         if(cond_is_full.wait_for(l, chrono::milliseconds(prod_wait_time),
                 [this] { return queue_.size() != max_size; })) {
@@ -66,7 +66,7 @@ public:
     {
         unilock l(mutex_);
 
-        std::cout<<"pop: queue size "<<queue_.size()<<", max_size "<<max_size<< std::endl;
+        std::cout<<"_pop: queue size "<<queue_.size()<<", max_size "<<max_size<< std::endl;
 
         if(cond_is_empty.wait_for(l, chrono::milliseconds(cons_wait_time),
                 [this] { return queue_.size() > 0; })) {

@@ -158,6 +158,7 @@ void play1() {
     ss<<"poped is "<<queue1.pop()<<endl;
 }
 
+
 int main()
 {
 //    std::thread t1(play1);
@@ -171,6 +172,20 @@ int main()
 //
 //    cout<<ss.str()<<endl;
 
+
+    try {
+        Server::Listener listener(1234);
+        boost::thread l(boost::bind(&Server::Listener::start, &listener));
+
+        Server::Dispatcher disp(listener);
+        boost::thread d(boost::bind(&Server::Dispatcher::start, &disp));
+
+        disp.join();
+        l.join();
+
+    } catch(exception& e) {
+        cout<<e.what()<<endl;
+    }
 
     cout << "Hello world!" << endl;
     return 0;
