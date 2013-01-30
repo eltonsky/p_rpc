@@ -3,27 +3,35 @@
 using boost::asio::ip::tcp;
 using namespace std;
 
+namespace Server {
 
-Listener::Listener(boost::asio::io_service& io_service_l,
-                   boost::asio::io_service& io_service_d, int port)
-            : _io_service_listener(io_service_l), _io_service_disp(io_service_d),
-                _acceptor(io_service_l, tcp::endpoint(tcp::v4(), port)) {
+    Listener::Listener(int port) : _bq_acpt_sock(5),
+                    _acceptor(_io_service_listener,
+                              tcp::endpoint(tcp::v4(), port)) {
+        //start dispatcher
+        //Dispatcher disp(*this);
+    }
 
-    while(1) {
-        _curr_sock = std::shared_ptr<tcp::socket>(new tcp::socket(io_service_d));
+    void Listener::start(){
 
-        _acceptor.accept(*(_curr_sock.get()));
+        printf("Listener started. <thread id : %ld>, <pid : %d> \n", (long int)syscall(SYS_gettid), getpid());
 
-        _bq_acpt_sock.push(_curr_sock);
+        while(1) {
+
+            _curr_sock = std::shared_ptr<tcp::socket>(new tcp::socket(_io_service_disp));
+
+            _acceptor.accept(*(_curr_sock.get()));
+
+            _bq_acpt_sock.push(_curr_sock);
+        }
+
+    }
+
+
+    Listener::~Listener()
+    {
+        cout<<"Listener destructor."<<endl;
     }
 
 }
-
-
-Listener::~Listener()
-{
-
-}
-
-
 
