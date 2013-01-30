@@ -10,18 +10,46 @@
 #include "unistd.h"
 #include "stdlib.h"
 #include "Listener.h"
+#include <signal.h>
+#include "Utils.h"
+
+Server::Listener* listener_ptr;
+atomic<bool> teminated(false);
+
+void terminate(int signum) {
+    if(signum == SIGINT && teminated == false) {
+        teminated.store(true);
+
+        cout << " Terminating .. " << endl;
+
+        long start = Utils::getTime();
+
+        listener_ptr->stop();
+
+        listener_ptr = NULL;
+
+        cout << "Terminate takes " << Utils::getTime() - start << " miliseconds" <<endl;
+
+        exit(0);
+    } else {
+        cout<<" SIGNAL "<<signum<<" ignored .."<<endl;
+    }
+}
+
 
 int main()
 {
+    signal(SIGINT, terminate);
+
     try {
+
         Server::Listener listener(1234);
-        boost::thread l(boost::bind(&Server::Listener::start, &listener));
 
-        Server::Dispatcher disp(listener);
-        boost::thread d(boost::bind(&Server::Dispatcher::start, &disp));
+        listener_ptr = &listener;
 
-        disp.join();
-        l.join();
+        listener.run();
+
+        listener.join();
 
     } catch(exception& e) {
         cout<<e.what()<<endl;
