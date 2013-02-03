@@ -15,8 +15,8 @@ using namespace std;
 template <typename T> class BlockQueue
 {
     unsigned max_size = 0;
-    int prod_wait_time = 500;
-    int cons_wait_time = 500;
+    const int prod_wait_time = 500;
+    const int cons_wait_time = 500;
 
     std::queue<T> queue_;
     std::mutex mutex_;
@@ -36,11 +36,15 @@ public:
 
     }
 
-    bool try_push(T const &val)
+    const int size() {
+        return queue_.size();
+    }
+
+    const bool try_push(T const &val)
     {
         unilock l(mutex_);
 
-        std::cout<<"try_push: queue size "<<queue_.size()<<", max_size "<<max_size<< std::endl;
+        cout<<"try_push: queue size "<<queue_.size()<<", max_size "<<max_size<< endl;
 
         if(cond_is_full.wait_for(l, chrono::milliseconds(prod_wait_time),
                 [this] { return queue_.size() != max_size; })) {
@@ -48,6 +52,8 @@ public:
             bool wake = queue_.empty(); // we may need to wake consumer
             queue_.push(val);
             if (wake) cond_is_empty.notify_one();
+
+cout<<"pushed "<<val<<" queue_ size " << queue_.size() << endl;;
 
             return true;
         }
@@ -62,14 +68,16 @@ public:
     }
 
 
-    bool _pop(T& result)
+    const bool _pop(T& result)
     {
         unilock l(mutex_);
 
-        std::cout<<"_pop: queue size "<<queue_.size()<<", max_size "<<max_size<< std::endl;
+        cout<<"_pop: queue size "<<queue_.size()<<", max_size "<<max_size<< endl;
 
         if(cond_is_empty.wait_for(l, chrono::milliseconds(cons_wait_time),
                 [this] { return queue_.size() > 0; })) {
+
+cout<<"ready to pop"<<endl;
 
             result = queue_.front();
             queue_.pop();
@@ -84,7 +92,7 @@ public:
     }
 
 
-    bool try_pop(T& result) {
+    const bool try_pop(T& result) {
         return _pop(result);
     }
 

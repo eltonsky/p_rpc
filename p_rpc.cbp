@@ -41,9 +41,11 @@
 		</Compiler>
 		<Unit filename="include/BlockQueue.h" />
 		<Unit filename="include/Listener.h" />
+		<Unit filename="include/Utils.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/BlockQueue.cpp" />
 		<Unit filename="src/Listener.cpp" />
+		<Unit filename="src/Utils.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
