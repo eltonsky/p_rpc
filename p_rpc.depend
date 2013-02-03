@@ -1,0 +1,27 @@
+# depslib dependency file v1.0
+1359250740 source:/home/eltonsky/cpp/p_rpc/src/BlockQueue.cpp
+	"BlockQueue.h"
+
+1359761292 source:/home/eltonsky/cpp/p_rpc/src/Listener.cpp
+	"Listener.h"
+
+1359760847 source:/home/eltonsky/cpp/p_rpc/main.cpp
+	<cstdlib>
+	<iostream>
+	<sstream>
+	<thread>
+	<mutex>
+	"BlockQueue.h"
+	<sys/syscall.h>
+	<chrono>
+	<condition_variable>
+	"unistd.h"
+	"stdlib.h"
+	"Listener.h"
+	<signal.h>
+	"Utils.h"
+
+1359760922 source:/home/eltonsky/cpp/p_rpc/src/Utils.cpp
+	"Utils.h"
+	"unistd.h"
+
