@@ -103,7 +103,7 @@ namespace Server {
         // set stop flag for listener. stop accept.
         _should_stop = true;
 
-cout<<"wait for readers" <<endl;
+        cout<<"wait for readers" <<endl;
         // set stop flag for all in the 1st place.
         for(int i=0; i<num_readers; i++) {
             _readers[i].get()->_should_stop = true;
@@ -113,7 +113,7 @@ cout<<"wait for readers" <<endl;
             _readers[i].get()->waitToFinish();
         }
 
-cout<<"readers are all finished" <<endl;
+        cout<<"readers are all finished" <<endl;
 
        _t_listener.interrupt();
 

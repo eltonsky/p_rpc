@@ -14,6 +14,7 @@
 #include <csignal>
 #include "BlockQueue.h"
 #include "Call.h"
+#include "Handler.h"
 
 using boost::asio::ip::tcp;
 
@@ -64,7 +65,7 @@ class Listener
 
         void _do_accept();
 
-
+        //Reader
         class Reader {
 
             BlockQueue<shared_ptr<tcp::socket>> _bq_sock;
@@ -74,11 +75,28 @@ class Listener
             void _do_read(shared_ptr<tcp::socket> sock) {
 
                 cout<<"_do_read from reader "<<_reader_index<<endl;
-//dummy test
-                char reply[10];
-                size_t reply_length = boost::asio::read(*(sock.get()),
-                    boost::asio::buffer(reply, 6));
-                cout<<reply<<", reply_length "<<reply_length<<endl;
+
+                try{
+                    //try to read a full call object
+                    Call* call = new Call(sock.get());
+
+                    if(!call->read()){
+                        throw "Failed to read call in Reader";
+                    }
+
+call->print();
+
+                    shared_ptr<Call> s_call(call);
+
+                    if(!_bq_call.try_push(s_call)) {
+                        throw "FATAL: can not insert call into _bq_call. is it full !?";
+                    }
+
+                    cout<<" _bq_call.size() " << _bq_call.size()<<endl;
+
+                } catch (exception& e) {
+                    cout<<e.what()<<endl;
+                }
 
             }
 

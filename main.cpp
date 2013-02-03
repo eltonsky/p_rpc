@@ -43,6 +43,8 @@ int main()
 
     try {
 
+        //TODO: init server
+
         Server::Listener listener(1234);
 
         listener_ptr = &listener;
