@@ -32,7 +32,6 @@ namespace Server {
     void Listener::start(){
 
         printf("Listener started. <thread id : %ld>, <pid : %d> \n", (long int)syscall(SYS_gettid), getpid());
-        cout<<"1 :"<<boost::this_thread::interruption_enabled()<<endl;
 
         if(!_should_stop) {
             _do_accept();
@@ -104,10 +103,6 @@ namespace Server {
         _should_stop = true;
 
         cout<<"wait for readers" <<endl;
-        // set stop flag for all in the 1st place.
-        for(int i=0; i<num_readers; i++) {
-            _readers[i].get()->_should_stop = true;
-        }
 
         for(int i=0; i<num_readers; i++) {
             _readers[i].get()->waitToFinish();

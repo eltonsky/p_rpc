@@ -7,8 +7,9 @@ namespace Server {
         //ctor
     }
 
-    Call::Call(tcp::socket* sock) {
+    Call::Call(tcp::socket* sock, int call_id) {
         _sock = sock;
+        _call_id = call_id;
     }
 
 
@@ -40,7 +41,7 @@ namespace Server {
 
 
     void Call::print() {
-        cout<<"class "<<_class<<" , method "<<_method<<endl;
+        cout<<"call_id " << _call_id<< ", class "<<_class<<" , method "<<_method<<endl;
     }
 
 

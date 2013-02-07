@@ -40,12 +40,18 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="include/BlockQueue.h" />
+		<Unit filename="include/Call.h" />
+		<Unit filename="include/Handler.h" />
 		<Unit filename="include/Listener.h" />
 		<Unit filename="include/Utils.h" />
+		<Unit filename="include/Writable.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="src/BlockQueue.cpp" />
+		<Unit filename="src/Call.cpp" />
+		<Unit filename="src/Handler.cpp" />
 		<Unit filename="src/Listener.cpp" />
 		<Unit filename="src/Utils.cpp" />
+		<Unit filename="src/Writable.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

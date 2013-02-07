@@ -20,8 +20,6 @@ using boost::asio::ip::tcp;
 
 namespace Server {
 
-const int recheck_interval = 500;
-
 class Listener
 {
     public:
@@ -78,7 +76,7 @@ class Listener
 
                 try{
                     //try to read a full call object
-                    Call* call = new Call(sock.get());
+                    Call* call = new Call(sock.get(), ++last_call_id);
 
                     if(!call->read()){
                         throw "Failed to read call in Reader";
@@ -139,6 +137,9 @@ call->print();
                 }
 
                 cout<<"Reader "<<_reader_index<<" finished."<<endl;
+
+                // stop producing any more calls
+                _should_stop = true;
 
                 _t_reader.interrupt();
             }

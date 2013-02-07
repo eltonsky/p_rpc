@@ -12,8 +12,9 @@
 #include "Listener.h"
 #include <signal.h>
 #include "Utils.h"
+#include "Server.h"
 
-Server::Listener* listener_ptr;
+Server::Server* server_ptr;
 atomic<bool> teminated(false);
 
 void terminate(int signum) {
@@ -24,9 +25,9 @@ void terminate(int signum) {
 
         long start = Utils::getTime();
 
-        listener_ptr->stop();
+        server_ptr->stop();
 
-        listener_ptr = NULL;
+        server_ptr = NULL;
 
         cout << "Terminate takes " << Utils::getTime() - start << " miliseconds" <<endl;
 
@@ -43,15 +44,9 @@ int main()
 
     try {
 
-        //TODO: init server
+        Server::Server serv(1234);
 
-        Server::Listener listener(1234);
-
-        listener_ptr = &listener;
-
-        listener.run();
-
-        listener.join();
+        server_ptr = &serv;
 
     }  catch(exception& e) {
         cout<<e.what()<<endl;

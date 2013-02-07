@@ -14,11 +14,13 @@ using boost::asio::ip::tcp;
 
 namespace Server{
 
+    const int recheck_interval = 500;
+
     class Call
     {
         public:
             Call();
-            Call(tcp::socket* sock);
+            Call(tcp::socket* sock,int);
             virtual ~Call();
             bool read();
             bool write();
