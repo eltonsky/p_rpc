@@ -16,6 +16,7 @@
 
 Server::Server* server_ptr;
 atomic<bool> teminated(false);
+const int server_port = 1234;
 
 void terminate(int signum) {
     if(signum == SIGINT && teminated == false) {
@@ -44,9 +45,11 @@ int main()
 
     try {
 
-        Server::Server serv(1234);
+        Server::Server serv(server_port);
 
         server_ptr = &serv;
+
+        serv.start();
 
     }  catch(exception& e) {
         cout<<e.what()<<endl;

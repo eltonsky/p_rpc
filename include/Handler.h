@@ -4,6 +4,7 @@
 #include "BlockQueue.h"
 #include "Call.h"
 #include <boost/thread.hpp>
+#include <sys/syscall.h>
 
 namespace Server{
 

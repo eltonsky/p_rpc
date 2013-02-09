@@ -11,7 +11,6 @@ namespace Server {
     Handler::Handler(short id)
     {
         _handler_id = id;
-        start();
     }
 
     void Handler::start() {
@@ -19,6 +18,8 @@ namespace Server {
     }
 
     void Handler::handle() {
+        printf("Handler %d started. <thread id : %ld>, <pid : %d> \n", _handler_id, (long int)syscall(SYS_gettid), getpid());
+
         shared_ptr<Call> call;
 
         while(!_should_stop) {
@@ -41,6 +42,8 @@ call.get()->print();
         _should_stop = true;
 
         _t_handler.interrupt();
+
+        cout<<"handler "<<_handler_id<<" finished."<<endl;
     }
 
 

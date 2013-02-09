@@ -26,6 +26,8 @@ namespace Server {
         }
 
         _t_listener = boost::thread(boost::bind(&Server::Listener::start,this));
+
+        _t_listener.join();
     }
 
 
@@ -99,18 +101,18 @@ namespace Server {
     void Listener::stop() {
         try{
 
-        // set stop flag for listener. stop accept.
-        _should_stop = true;
+            // set stop flag for listener. stop accept.
+            _should_stop = true;
 
-        cout<<"wait for readers" <<endl;
+            cout<<"wait for readers" <<endl;
 
-        for(int i=0; i<num_readers; i++) {
-            _readers[i].get()->waitToFinish();
-        }
+            for(int i=0; i<num_readers; i++) {
+                _readers[i].get()->waitToFinish();
+            }
 
-        cout<<"readers are all finished" <<endl;
+           _t_listener.interrupt();
 
-       _t_listener.interrupt();
+           cout<<"listener finished" <<endl;
 
         } catch( exception& e ) {
             cout<<"Listener::stop() : "<<e.what()<<endl;
