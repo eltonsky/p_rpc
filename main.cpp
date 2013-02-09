@@ -13,10 +13,12 @@
 #include <signal.h>
 #include "Utils.h"
 #include "Server.h"
+#include "Log.h"
 
 Server::Server* server_ptr;
 atomic<bool> teminated(false);
 const int server_port = 1234;
+const string log_conf = "/home/eltonsky/cpp/p_rpc/conf/log4cpp.properties";
 
 void terminate(int signum) {
     if(signum == SIGINT && teminated == false) {
@@ -42,6 +44,7 @@ void terminate(int signum) {
 int main()
 {
     signal(SIGINT, terminate);
+    Log::init(log_conf);
 
     try {
 
