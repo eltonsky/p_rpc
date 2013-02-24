@@ -7,20 +7,18 @@ namespace Server {
         //ctor
     }
 
-    Call::Call(tcp::socket* sock, int call_id) {
-        _sock = sock;
-        _call_id = call_id;
+    Call::Call(shared_ptr<tcp::socket> sock, int call_id) : _sock(sock), _call_id(call_id) {
     }
 
 
     bool Call::read() {
-        if(_sock == NULL)
+        if(_sock.get() == NULL)
             return false;
 
         try{
 
-            _class = Writable::readString(_sock);
-            _method = Writable::readString(_sock);
+            _class = Writable::readString(_sock.get());
+            _method = Writable::readString(_sock.get());
 
 //TODO:read param
 
@@ -33,15 +31,24 @@ namespace Server {
     }
 
     bool Call::write() {
-        //just write value back for now.
-        value.write(_sock);
+
+        try{
+            //just write value back for now.
+            _value.get()->write(_sock.get());
+        }
+         catch(exception& e) {
+            cout<<e.what()<<endl;
+            return false;
+        }
 
         return true;
     }
 
 
-    void Call::print() {
-        cout<<"call_id " << _call_id<< ", class "<<_class<<" , method "<<_method<<endl;
+    string Call::toString() {
+        stringstream ss;
+        ss <<"call_id "<<_call_id<<", class "<<_class<<" , method "<<_method;
+        return ss.str();
     }
 
 

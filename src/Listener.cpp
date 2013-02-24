@@ -33,7 +33,7 @@ namespace Server {
 
     void Listener::start(){
 
-        printf("Listener started. <thread id : %ld>, <pid : %d> \n", (long int)syscall(SYS_gettid), getpid());
+        Log::write(INFO, "Listener started. <thread id : %ld>, <pid : %d> \n", (long int)syscall(SYS_gettid), getpid());
 
         if(!_should_stop) {
             _do_accept();
@@ -41,14 +41,14 @@ namespace Server {
 
         _io_service_listener.run();
 
-        cout<<" _io_service_listener exit.. "<<endl;
+        Log::write(INFO,"_io_service_listener exit.. \n");
     }
 
 
     void Listener::handle_accept(shared_ptr<tcp::socket>& sock,
       const boost::system::error_code& error)
     {
-        cout<<"error: "<<error<<endl;
+        Log::write(DEBUG, "Listener::handle_accept, error %s\n", error);
 
         if (!error && !_should_stop)
         {
@@ -65,7 +65,7 @@ namespace Server {
     void Listener::handle_read(shared_ptr<tcp::socket> sock, const boost::system::error_code& error,
               size_t bytes_transferred)
     {
-        cout<<"handle_read: error " << error<<endl;
+        Log::write(DEBUG, "handle_read: error %s\n", error);
 
         if (!error && !_should_stop)
         {
@@ -83,11 +83,11 @@ namespace Server {
 
         while(retry_times < num_readers) {
             if(_readers[_last_reader_index].get()->add(sock)) {
-                cout<<"added to reader "<<_last_reader_index<<endl;
+                Log::write(DEBUG, "added to reader,  _last_reader_index %d\n", _last_reader_index);
 
                 return true;
             } else {
-                cout<<"Failed to add to reader "<<_last_reader_index<<endl;
+                Log::write(ERROR, "Failed to add to reader! _last_reader_index %d\n", _last_reader_index);
             }
 
             _last_reader_index = (_last_reader_index+1)%num_readers;
@@ -104,7 +104,7 @@ namespace Server {
             // set stop flag for listener. stop accept.
             _should_stop = true;
 
-            cout<<"wait for readers" <<endl;
+            Log::write(INFO, "wait for readers\n");
 
             for(int i=0; i<num_readers; i++) {
                 _readers[i].get()->waitToFinish();
@@ -112,10 +112,10 @@ namespace Server {
 
            _t_listener.interrupt();
 
-           cout<<"listener finished" <<endl;
+            Log::write(INFO, "listener finished\n");
 
         } catch( exception& e ) {
-            cout<<"Listener::stop() : "<<e.what()<<endl;
+            Log::write(ERROR, "Listener::stop() : %s\n", e.what());
             exit(1);
         }
 

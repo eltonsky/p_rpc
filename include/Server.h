@@ -3,6 +3,7 @@
 
 #include "Listener.h"
 #include "Handler.h"
+#include "Responder.h"
 
 namespace Server{
 
@@ -22,7 +23,7 @@ namespace Server{
         private:
             Listener _listener;
             shared_ptr<Handler> _handlers[num_handlers];
-
+            Responder _responder;
     };
 
 }

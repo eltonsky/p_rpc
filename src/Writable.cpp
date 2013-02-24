@@ -10,29 +10,29 @@ Writable::~Writable()
     //dtor
 }
 
-void Writable::readFields(tcp::socket * sock) {}
+int Writable::readFields(tcp::socket * sock) {return 0;}
 
-void Writable::write(tcp::socket * sock){}
+int Writable::write(tcp::socket * sock) {return 0;}
+
 
 int Writable::writeString(tcp::socket*sock, string str) {
     int length = str.size();
-
-cout<<"writeString : length " <<length<<endl;
 
     if(sock == NULL || length == 0)
         return 0;
 
     size_t l = boost::asio::write(*sock, boost::asio::buffer((const char*)&length, sizeof(length)));
 
-cout<<"writeString : write length " <<l<<endl;
+    Log::write(DEBUG, "writeString : length of length %d\n", l);
 
     size_t send_length =
         boost::asio::write(*sock, boost::asio::buffer(str.c_str(), str.size()));
 
-cout<<"writeString : send  length " <<send_length<<endl;
+    Log::write(DEBUG, "writeString : write %s length %d\n", str.c_str(), send_length);
 
     return send_length;
 }
+
 
 string Writable::readString(tcp::socket * sock){
     if(sock == NULL)
@@ -43,7 +43,7 @@ string Writable::readString(tcp::socket * sock){
     size_t l = boost::asio::read(*sock,
             boost::asio::buffer(&length, sizeof(length)));
 
-cout<<"readString : l " <<l<<" , length "<<length<<endl;
+    Log::write(DEBUG, "readString : length of length %d\n", l);
 
     if(length > 0) {
         char char_str[length];
@@ -51,12 +51,14 @@ cout<<"readString : l " <<l<<" , length "<<length<<endl;
         size_t reply_length = boost::asio::read(*sock,
             boost::asio::buffer(char_str, length));
 
-cout<<"readString : reply_length " <<reply_length<<" , char_str "<<char_str<<endl;
+        Log::write(DEBUG, "readString : %s, length %d\n", char_str, reply_length);
 
-
-        if(reply_length > 0)
+        if(reply_length > 0) {
             return string(char_str);
+        }
     }
 
     return NULL;
 }
+
+

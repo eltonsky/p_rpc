@@ -72,17 +72,17 @@ class Listener
 
             void _do_read(shared_ptr<tcp::socket> sock) {
 
-                cout<<"_do_read from reader "<<_reader_index<<endl;
+                Log::write(INFO, "_do_read from reader %d\n", _reader_index);
 
                 try{
                     //try to read a full call object
-                    Call* call = new Call(sock.get(), ++last_call_id);
+                    Call* call = new Call(sock, ++last_call_id);
 
                     if(!call->read()){
                         throw "Failed to read call in Reader";
                     }
 
-call->print();
+                    Log::write(DEBUG, "Reader %d get call %s\n", _reader_index, call->toString().c_str());
 
                     shared_ptr<Call> s_call(call);
 
@@ -90,12 +90,11 @@ call->print();
                         throw "FATAL: can not insert call into _bq_call. is it full !?";
                     }
 
-                    cout<<" _bq_call.size() " << _bq_call.size()<<endl;
+                    Log::write(INFO, "_bq_call.size() %d\n", _bq_call.size());
 
                 } catch (exception& e) {
-                    cout<<e.what()<<endl;
+                    Log::write(ERROR, e.what());
                 }
-
             }
 
         public:
@@ -118,7 +117,7 @@ call->print();
             }
 
             void start() {
-                printf("Reader %d started. <thread id : %ld>, <pid : %d> \n",
+                Log::write(INFO, "Reader %d started. <thread id : %ld>, <pid : %d> \n",
                        _reader_index, (long int)syscall(SYS_gettid), getpid());
 
                 while(!_should_stop) {
@@ -136,7 +135,7 @@ call->print();
                     this_thread::sleep_for(chrono::milliseconds(recheck_interval));
                 }
 
-                cout<<"Reader "<<_reader_index<<" finished."<<endl;
+                Log::write(INFO, "Reader %d finished\n", _reader_index);
 
                 // stop producing any more calls
                 _should_stop = true;

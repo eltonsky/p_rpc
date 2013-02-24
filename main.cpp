@@ -18,13 +18,13 @@
 Server::Server* server_ptr;
 atomic<bool> teminated(false);
 const int server_port = 1234;
-const string log_conf = "/home/eltonsky/cpp/p_rpc/conf/log4cpp.properties";
+const string log_conf = "./conf/log4cpp.properties";
 
 void terminate(int signum) {
     if(signum == SIGINT && teminated == false) {
         teminated.store(true);
 
-        cout << " Terminating .. " << endl;
+        Log::write(INFO, " Terminating .. \n");
 
         long start = Utils::getTime();
 
@@ -32,11 +32,11 @@ void terminate(int signum) {
 
         server_ptr = NULL;
 
-        cout << "Terminate takes " << Utils::getTime() - start << " miliseconds" <<endl;
+        Log::write(INFO, "Terminate takes %ld miliseconds\n", (Utils::getTime() - start));
 
         exit(0);
     } else {
-        cout<<" SIGNAL "<<signum<<" ignored .."<<endl;
+        Log::write(INFO, "SIGNAL %d ignored ..\n", signum);
     }
 }
 
@@ -55,10 +55,10 @@ int main()
         serv.start();
 
     }  catch(exception& e) {
-        cout<<e.what()<<endl;
+        Log::write(INFO, e.what());
     }
 
-    cout << "Finish.." << endl;
+    Log::write(INFO, "Finish !\n");
     return 0;
 }
 

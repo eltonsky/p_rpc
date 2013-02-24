@@ -2,7 +2,7 @@
 
 namespace Server {
 
-    Server::Server(int port) : _listener(port)
+    Server::Server(int port) : _listener(port), _responder()
     {
         for(short i=0;i<num_handlers;i++) {
             _handlers[i] = shared_ptr<Handler>(new Handler(i));
@@ -10,6 +10,8 @@ namespace Server {
     }
 
     void Server::start() {
+        _responder.start();
+
         for(short i=0;i<num_handlers;i++) {
             _handlers[i].get()->start();
         }
@@ -24,6 +26,8 @@ namespace Server {
         for(short i=0;i<num_handlers;i++) {
             _handlers[i].get()->waitToFinish();
         }
+
+        _responder.waitToFinish();
     }
 
 

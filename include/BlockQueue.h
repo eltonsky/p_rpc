@@ -9,6 +9,7 @@
 #include <condition_variable>
 #include <chrono>
 #include <thread>
+#include "Log.h"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ public:
     }
 
     const int size() {
+        unilock l(mutex_);
         return queue_.size();
     }
 
@@ -44,7 +46,7 @@ public:
     {
         unilock l(mutex_);
 
-        cout<<"try_push: queue size "<<queue_.size()<<", max_size "<<max_size<< endl;
+        Log::write(DEBUG, "try_push: queue size %d, max_size %d\n",queue_.size(),max_size);
 
         if(cond_is_full.wait_for(l, chrono::milliseconds(prod_wait_time),
                 [this] { return queue_.size() != max_size; })) {
@@ -53,7 +55,7 @@ public:
             queue_.push(val);
             if (wake) cond_is_empty.notify_one();
 
-cout<<"pushed "<<val<<" queue_ size " << queue_.size() << endl;;
+            Log::write(DEBUG, "pushed value, queue size %d\n", queue_.size());\
 
             return true;
         }
@@ -72,12 +74,10 @@ cout<<"pushed "<<val<<" queue_ size " << queue_.size() << endl;;
     {
         unilock l(mutex_);
 
-        cout<<"_pop: queue size "<<queue_.size()<<", max_size "<<max_size<< endl;
+        Log::write(DEBUG, "_pop: queue size %d, max_size %d\n", queue_.size(), max_size);
 
         if(cond_is_empty.wait_for(l, chrono::milliseconds(cons_wait_time),
                 [this] { return queue_.size() > 0; })) {
-
-cout<<"ready to pop"<<endl;
 
             result = queue_.front();
             queue_.pop();
