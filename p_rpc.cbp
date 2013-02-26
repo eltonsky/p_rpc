@@ -42,6 +42,7 @@
 		</Compiler>
 		<Unit filename="include/BlockQueue.h" />
 		<Unit filename="include/Call.h" />
+		<Unit filename="include/Client.h" />
 		<Unit filename="include/Handler.h" />
 		<Unit filename="include/IntWritable.h" />
 		<Unit filename="include/Listener.h" />
@@ -53,6 +54,7 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="src/BlockQueue.cpp" />
 		<Unit filename="src/Call.cpp" />
+		<Unit filename="src/Client.cpp" />
 		<Unit filename="src/Handler.cpp" />
 		<Unit filename="src/IntWritable.cpp" />
 		<Unit filename="src/Listener.cpp" />
