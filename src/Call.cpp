@@ -2,10 +2,7 @@
 
 namespace Server {
 
-    Call::Call()
-    {
-        //ctor
-    }
+    Call::Call(){}
 
     Call::Call(shared_ptr<tcp::socket> sock, int call_id) : _sock(sock), _call_id(call_id) {
     }
@@ -29,6 +26,7 @@ namespace Server {
 
         return true;
     }
+
 
     bool Call::write() {
 
