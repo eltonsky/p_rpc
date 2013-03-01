@@ -28,7 +28,7 @@ void Client::start() {
 
 void Client::recvRespond() {
 
-    shared_ptr<Call> _curr_call = _bq_client_calls.pop();
+    Call*_curr_call = _bq_client_calls.pop();
 
 cout<<"_curr_call poped : "<< _curr_call->getParam()->toString()<<endl;
 
@@ -68,7 +68,7 @@ void Client::stop() {
 }
 
 
-shared_ptr<Writable> Client::call(shared_ptr<Call> call) {
+shared_ptr<Writable> Client::call(Call* call) {
 
     if(!call->connect(_server_ep)) {
         Log::write(ERROR, "Can not connect to endpoint  %s : %d \n",
@@ -76,7 +76,7 @@ shared_ptr<Writable> Client::call(shared_ptr<Call> call) {
         throw "Can not connect";
     }
 
-    sendCall(call.get());
+    sendCall(call);
 
     if(!_bq_client_calls.try_push(call)) {
         throw "FATAL: can not insert call into _bq_client_calls. is it full !?";
@@ -89,6 +89,7 @@ shared_ptr<Writable> Client::call(shared_ptr<Call> call) {
 
     while(!_should_stop && !call->getDone()) {
         call->wait(_call_wait_time);
+sleep(1);
     }
 
     return call->getValue();
@@ -111,7 +112,6 @@ void Client::sendCall(Call* call) {
 
 Client::~Client()
 {
-    //dtor
 }
 
 

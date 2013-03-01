@@ -30,10 +30,18 @@ bool Test1::test1(string server_host, int port) {
 //    Client::Call* call = new Client::Call(w, "IntWritable");
 //    client.call(call);
 //    shared_ptr<Writable> val = client.call(call);
-//    Log::write(INFO, "In thread %ld, client received value : %s\n" , (long int)syscall(SYS_gettid), val->toString().c_str());
+//
 //    delete call;
 
-    client.call(shared_ptr<Client::Call>(new Client::Call(w, "IntWritable")));
+    Client::Call * call = new Client::Call(w, "IntWritable");
+    shared_ptr<Writable> val = client.call(call);
+
+    Log::write(INFO, "In thread %ld, client received value : %s\n" , (long int)syscall(SYS_gettid), val->toString().c_str());
+
+//    Log::write(INFO, "_param use_count : %d, _value use_count %d, _sock use_count %d\n", call->getParam().use_count(), call->getValue().use_count(),
+//               call->getSock().use_count() );
+
+    delete call;
 
     return true;
 }

@@ -87,9 +87,9 @@ int main(int argc, char** argv)
 
         if(!ifServer) {
             Test1 t1;
-            // t1.test1(server_host, port);
+            t1.test1(server_host, port);
 
-            t1.test2(server_host, port);
+            //t1.test2(server_host, port);
 
         } else {
             signal(SIGINT, terminate);
