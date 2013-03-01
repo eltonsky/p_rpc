@@ -58,14 +58,14 @@ class Client
                 }
 
                 void wait(long call_wait_time) {
-//                    std::unique_lock<std::mutex> ulock(_mutex);
-//
-//                    while(!_done) {
-//                        if(_cond.wait_for(ulock, chrono::milliseconds(call_wait_time),
-//                            [this] { return _done; })) {
-//                            break;
-//                        }
-//                    }
+                    std::unique_lock<std::mutex> ulock(_mutex);
+
+                    while(!_done) {
+                        if(_cond.wait_for(ulock, chrono::milliseconds(call_wait_time),
+                            [this] { return _done; })) {
+                            break;
+                        }
+                    }
                 }
 
 
@@ -78,23 +78,17 @@ class Client
                     Log::write(DEBUG, "setValue : _value is %s\n", _value->toString().c_str());
 
                     _done = true;
-//                    _cond.notify_all();
+                    _cond.notify_all();
                 }
 
 
                 bool connect(tcp::endpoint ep) {
                     try{
-                        boost::asio::io_service io_service;
-                        tcp::resolver resolver(io_service);
+                        tcp::resolver resolver(_io_service);
                         tcp::resolver::query query(tcp::v4(), ep.address().to_string(), std::to_string(ep.port()));
                         tcp::resolver::iterator iterator = resolver.resolve(query);
 
-//                        shared_ptr<tcp::socket> s = shared_ptr<tcp::socket>(new tcp::socket(io_service));
-//                        s.get()->connect(*iterator);
-//
-//                        _sock = s;
-
-                        _sock = new tcp::socket(io_service);
+                        _sock = new tcp::socket(_io_service);
                         _sock->connect(*iterator);
 
                         Log::write(INFO, "call connected to %s : %d", ep.address().to_string().c_str(), ep.port());
@@ -113,8 +107,6 @@ class Client
                 shared_ptr<Writable> getParam() const {return _param;}
                 string getValueClass() const {return _valueClass;}
 
-//shared_ptr<tcp::socket> getSock() {return _sock;}
-
             private:
 
                 string _valueClass;
@@ -122,9 +114,10 @@ class Client
                 shared_ptr<Writable> _param;
                 shared_ptr<Writable> _value;
                 bool _done;
-//                std::mutex _mutex;
-//                std::condition_variable _cond;
+                std::mutex _mutex;
+                std::condition_variable _cond;
                 tcp::socket* _sock;
+                boost::asio::io_service _io_service;
         };
 
         Client(tcp::endpoint ep);
@@ -133,8 +126,7 @@ class Client
         bool waitForWork();
         void recvRespond();
 
-        shared_ptr<Writable> call(Call*);
-//        shared_ptr<Writable> call(Call*);
+        shared_ptr<Writable> call(shared_ptr<Writable> param, string value_class);
 
         void start();
 
@@ -145,7 +137,7 @@ class Client
 
         private:
 
-            BlockQueue<Call*> _bq_client_calls;
+            BlockQueue<shared_ptr<Call>> _bq_client_calls;
 };
 
 #endif // CLIENT_H
