@@ -6,19 +6,34 @@ Method::Method()
 }
 
 
-void Method::call(Server::Call* call) {
-    string c = call->getClass();
-    string m = call->getMethod();
+shared_ptr<Writable> Method::call(string c, string m, vector<shared_ptr<Writable>> params) {
 
-    Log::write(INFO, "get a call: class %s, method %s\n", c.c_str(), m.c_str());
+    Log::write(INFO, "Method::call : class %s, method %s\n", c.c_str(), m.c_str());
 
-    if(c == "FSNameSpace") {
+    if(c == "FSNameSystem") {
         if(m == "create") {
             IntWritable* iw = new IntWritable(21);
-            call->setValue(shared_ptr<IntWritable>(iw));
+            //call->setValue(shared_ptr<IntWritable>(iw));
+
+            return shared_ptr<IntWritable>(iw);
         }
     }
 
+    return NULL;
+}
+
+
+shared_ptr<Writable> Method::getNewInstance(string class_) {
+    if(class_ == "IntWritable") {
+        return shared_ptr<Writable>(new IntWritable());
+    } else if(class_ == "FileSystem") {
+
+    } else if(class_ == "MethodWritable"){
+        return shared_ptr<Writable>(new MethodWritable());
+
+    }
+
+    return shared_ptr<Writable>(new Writable());
 }
 
 

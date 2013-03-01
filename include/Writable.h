@@ -20,6 +20,8 @@ class Writable
         virtual ~Writable();
         virtual int readFields(tcp::socket * sock);
         virtual int write(tcp::socket * sock);
+        virtual string toString();
+        virtual string getClass();
 
         static int writeString(tcp::socket*sock, string str);
         static string readString(tcp::socket * sock);

@@ -14,6 +14,7 @@ int Writable::readFields(tcp::socket * sock) {return 0;}
 
 int Writable::write(tcp::socket * sock) {return 0;}
 
+string Writable::toString() {return NULL;}
 
 int Writable::writeString(tcp::socket*sock, string str) {
     int length = str.size();
@@ -60,5 +61,11 @@ string Writable::readString(tcp::socket * sock){
 
     return NULL;
 }
+
+
+string Writable::getClass() { return "Writable";}
+
+
+
 
 

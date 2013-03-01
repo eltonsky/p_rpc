@@ -7,6 +7,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include "Writable.h"
+#include "Method.h"
 #include <string>
 #include "IntWritable.h"
 
@@ -28,9 +29,12 @@ namespace Server{
 
             string toString();
 
+            // for test
+            string print();
+
             inline const string getClass() const {return _class;}
             inline const string getMethod() const {return _method;}
-            inline const vector<Writable>& getParams() const {return _params;}
+            inline const vector<shared_ptr<Writable>> getParams() const {return _params;}
             void setValue(shared_ptr<Writable> v) {
                 _value = v;
             }
@@ -44,7 +48,7 @@ namespace Server{
             int _call_id;
             string _class;
             string _method;
-            vector<Writable> _params;
+            vector<shared_ptr<Writable>> _params;
             shared_ptr<Writable> _value;
     };
 

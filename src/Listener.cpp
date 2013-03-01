@@ -48,7 +48,7 @@ namespace Server {
     void Listener::handle_accept(shared_ptr<tcp::socket>& sock,
       const boost::system::error_code& error)
     {
-        Log::write(DEBUG, "Listener::handle_accept, error %s\n", error);
+        Log::write(DEBUG, "Listener::handle_accept, error %s\n", error.message().c_str());
 
         if (!error && !_should_stop)
         {
@@ -65,7 +65,7 @@ namespace Server {
     void Listener::handle_read(shared_ptr<tcp::socket> sock, const boost::system::error_code& error,
               size_t bytes_transferred)
     {
-        Log::write(DEBUG, "handle_read: error %s\n", error);
+        Log::write(DEBUG, "handle_read: error %s\n", error.message().c_str());
 
         if (!error && !_should_stop)
         {

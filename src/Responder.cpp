@@ -46,9 +46,13 @@ namespace Server{
         Log::write(INFO, "responder finished\n");
     }
 
+
     Responder::~Responder()
     {
         //dtor
     }
 
 }
+
+
+

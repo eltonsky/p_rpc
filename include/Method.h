@@ -3,7 +3,7 @@
 
 #include "Writable.h"
 #include "IntWritable.h"
-#include "Call.h"
+#include "MethodWritable.h"
 
 using namespace std;
 
@@ -13,7 +13,8 @@ class Method
         Method();
         virtual ~Method();
 
-        static void call(Server::Call*);
+        static shared_ptr<Writable> call(string class_, string method, vector<shared_ptr<Writable>> params);
+        static shared_ptr<Writable> getNewInstance(string class_);
     protected:
     private:
 };

@@ -6,7 +6,7 @@ MethodWritable::MethodWritable()
 }
 
 
-MethodWritable::MethodWritable(string c, string m, vector<Writable>& p)
+MethodWritable::MethodWritable(string c, string m, vector<shared_ptr<Writable>> p)
     : _class_name(c), _method_name(m), _params(p) {}
 
 
@@ -35,7 +35,11 @@ int MethodWritable::readFields(tcp::socket * sock) {
 
         _params.reserve(size);
         for(size_t i =0; i < size; i++) {
-            _params[i].readFields(sock);
+            string param_class = Writable::readString(sock);
+
+            _params.push_back(Method::getNewInstance(param_class));
+
+            _params[i]->readFields(sock);
         }
     } catch(...){
         Log::write(ERROR, "Fail to write MethodWritable, class %s, method %s\n",
@@ -70,7 +74,9 @@ int MethodWritable::write(tcp::socket * sock){
         }
 
         for(size_t i =0; i < size; i++) {
-            _params[i].write(sock);
+            Writable::writeString(sock, _params[i]->getClass());
+
+            _params[i]->write(sock);
         }
 
     } catch(...){
@@ -80,6 +86,22 @@ int MethodWritable::write(tcp::socket * sock){
     }
 
     return 0;
+}
+
+
+
+string MethodWritable::toString() {
+    string str;
+    str.append("class : ");
+    str.append(_class_name);
+    str.append(" , method : ");
+    str.append(_method_name);
+    return str;
+}
+
+
+string MethodWritable::getClass() {
+    return "MethodWritable";
 }
 
 

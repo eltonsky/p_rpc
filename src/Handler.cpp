@@ -17,6 +17,7 @@ namespace Server {
         _t_handler = boost::thread(boost::bind(&Server::Handler::handle, this));
     }
 
+
     void Handler::handle() {
         Log::write(INFO, "Handler %d started. <thread id : %ld>, <pid : %d> \n", _handler_id, (long int)syscall(SYS_gettid), getpid());
 
@@ -25,13 +26,15 @@ namespace Server {
         while(!_should_stop) {
             call = _bq_call.pop();
 
-            //print
             Log::write(DEBUG, "call in handler %d, call is %s\n", _handler_id, call.get()->toString().c_str());
 
             //call
-            Method::call(call.get());
+            shared_ptr<Writable> res =
+                Method::call(call->getClass(), call->getMethod(), call->getParams());
 
-            Log::write(INFO, "value is %d\n", ((IntWritable*)call.get()->getValue())->get());
+            call->setValue(res);
+
+            Log::write(INFO, "value is %s\n", res->toString().c_str());
 
             if(!_bq_respond.try_push(call)) {
                 throw "FATAL: can not insert call into _bq_respond. is it full !?";

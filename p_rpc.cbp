@@ -48,7 +48,10 @@
 		<Unit filename="include/Listener.h" />
 		<Unit filename="include/Log.h" />
 		<Unit filename="include/Method.h" />
+		<Unit filename="include/MethodWritable.h" />
+		<Unit filename="include/Responder.h" />
 		<Unit filename="include/Server.h" />
+		<Unit filename="include/Test1.h" />
 		<Unit filename="include/Utils.h" />
 		<Unit filename="include/Writable.h" />
 		<Unit filename="main.cpp" />
@@ -60,7 +63,10 @@
 		<Unit filename="src/Listener.cpp" />
 		<Unit filename="src/Log.cpp" />
 		<Unit filename="src/Method.cpp" />
+		<Unit filename="src/MethodWritable.cpp" />
+		<Unit filename="src/Responder.cpp" />
 		<Unit filename="src/Server.cpp" />
+		<Unit filename="src/Test1.cpp" />
 		<Unit filename="src/Utils.cpp" />
 		<Unit filename="src/Writable.cpp" />
 		<Extensions>
