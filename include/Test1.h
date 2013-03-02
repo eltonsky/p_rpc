@@ -28,8 +28,8 @@ class Test1
         Test1();
         virtual ~Test1();
 
-        bool test1(std::string, int);
-        bool test2(std::string, int);
+        bool test1(std::string, int, int rep = 1);
+        bool test2(std::string, int, int thread = 1, int rep =1);
 
     protected:
     private:

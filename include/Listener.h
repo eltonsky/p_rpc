@@ -25,7 +25,7 @@ class Listener
     public:
         bool _should_stop = false;
         static const short num_readers = 2;
-        const short max_reader_queue_size = 5;
+        const short max_reader_queue_size = 10;
         boost::asio::io_service _io_service_listener;
         boost::asio::io_service _io_service_disp;
         BlockQueue<std::shared_ptr<tcp::socket>> _bq_acpt_sock;

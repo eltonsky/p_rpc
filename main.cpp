@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
         if(!ifServer) {
             Test1 t1;
-            t1.test2(server_host, port);
+            t1.test2(server_host, port, 20, 1000);
 
             //t1.test2(server_host, port);
 

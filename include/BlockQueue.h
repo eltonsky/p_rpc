@@ -46,7 +46,7 @@ public:
     {
         unilock l(mutex_);
 
-//        Log::write(DEBUG, "try_push: queue size %d, max_size %d\n",queue_.size(),max_size);
+        Log::write(DEBUG, "try_push: queue size %d, max_size %d\n",queue_.size(),max_size);
 
         if(cond_is_full.wait_for(l, chrono::milliseconds(prod_wait_time),
                 [this] { return queue_.size() != max_size; })) {
@@ -55,7 +55,7 @@ public:
             queue_.push(val);
             if (wake) cond_is_empty.notify_one();
 
-//            Log::write(DEBUG, "pushed value, queue size %d\n", queue_.size());
+            Log::write(DEBUG, "pushed value, queue size %d\n", queue_.size());
 
             return true;
         }

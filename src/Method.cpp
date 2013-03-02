@@ -15,6 +15,9 @@ shared_ptr<Writable> Method::call(string c, string m, vector<shared_ptr<Writable
             IntWritable* iw = new IntWritable(21);
             //call->setValue(shared_ptr<IntWritable>(iw));
 
+/***simulate real call**/
+//std::this_thread::sleep_for(chrono::milliseconds(200));
+
             return shared_ptr<IntWritable>(iw);
         }
     }
