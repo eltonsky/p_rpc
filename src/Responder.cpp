@@ -3,7 +3,7 @@
 namespace Server{
 
     const int max_repsond_size = 100;
-    BlockQueue<std::shared_ptr<Call>> _bq_respond(max_repsond_size);
+    BlockQueue<int> _bq_respond(max_repsond_size);
 
 
     Responder::Responder()
@@ -30,6 +30,23 @@ namespace Server{
 
             call.get()->write();
         }
+    }
+
+
+    //this is called by multiple handlers, so we need to sync it.
+    bool Responder::doRespond(shared_ptr<Call> call) {
+         std::unique_lock<std::mutex> ulock(_mutex);
+
+        if(!call->getConnection()->respond_queue.try_push(call)) {
+            Log::write(ERROR ,"FATAL: can not insert call into respond_queue. is it full !?");
+            return false;
+        }
+
+        if(call->getConnection()->respond_queue.size() == 1) {
+            processResponse(call->getConnection()->respond_queue);
+        }
+
+        return true;
     }
 
 

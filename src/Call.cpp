@@ -7,22 +7,31 @@ namespace Server {
         //ctor
     }
 
-    Call::Call(shared_ptr<tcp::socket> sock, int call_id) : _sock(sock), _call_id(call_id) {
+    Call::Call(shared_ptr<Connection> conn) : _connection(conn) {
     }
 
 
     bool Call::read() {
-        if(_sock.get() == NULL)
+        if(_connection.get() == NULL)
             return false;
 
-        try{
-            _class = Writable::readString(_sock.get());
+        tcp::socket* sock = _connection->getSock()->get();
 
-            _method = Writable::readString(_sock.get());
+        try{
+            size_t l = boost::asio::read(*(sock),
+                boost::asio::buffer(&_curr_id, sizeof(_curr_id)));
+             if(l <= 0) {
+                Log::write(ERROR, "Fail to read call id\n");
+                return -1;
+            }
+
+            _class = Writable::readString(sock);
+
+            _method = Writable::readString(sock);
 
             //params
             size_t size = -1;
-            size_t l = boost::asio::read(*(_sock.get()),
+            l = boost::asio::read(*(sock),
                 boost::asio::buffer(&size, sizeof(size)));
 
             if(l <= 0) {
@@ -34,11 +43,11 @@ namespace Server {
             _params.reserve(size);
 
             for(size_t i =0; i < size; i++) {
-                string param_class = Writable::readString(_sock.get());
+                string param_class = Writable::readString(sock);
 
                 _params.push_back(Method::getNewInstance(param_class));
 
-                _params[i]->readFields(_sock.get());
+                _params[i]->readFields(sock);
             }
 
         } catch(exception& e) {

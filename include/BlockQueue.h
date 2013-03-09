@@ -16,8 +16,8 @@ using namespace std;
 template <typename T> class BlockQueue
 {
     unsigned max_size = 0;
-    const int prod_wait_time = 500;
-    const int cons_wait_time = 500;
+    const int prod_wait_time = 100;
+    const int cons_wait_time = 100;
 
     std::queue<T> queue_;
     std::mutex mutex_;

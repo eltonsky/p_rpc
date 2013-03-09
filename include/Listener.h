@@ -33,7 +33,8 @@ class Listener
 
         Listener(int port);
 
-        virtual ~Listener();
+        //remove virtual from all pipeline classes, coz they will not be inherited anyway.
+        ~Listener();
 
         void run();
 
@@ -66,17 +67,17 @@ class Listener
         //Reader
         class Reader {
 
-            BlockQueue<shared_ptr<tcp::socket>> _bq_sock;
+            BlockQueue<shared_ptr<Connection>> _bq_conn;
             boost::thread _t_reader;
             const short _reader_index;
 
-            void _do_read(shared_ptr<tcp::socket> sock) {
+            void _do_read(shared_ptr<Connection> conn) {
 
                 Log::write(INFO, "_do_read from reader %d\n", _reader_index);
 
                 try{
                     //try to read a full call object
-                    Call* call = new Call(sock, ++last_call_id);
+                    Call* call = new Call(conn);
 
                     if(!call->read()){
                         throw "Failed to read call in Reader";
@@ -102,11 +103,11 @@ class Listener
             bool _should_stop = false;
 
             Reader(short index, short max_q_size) :
-                _bq_sock(max_q_size),
+                _bq_conn(max_q_size),
                 _reader_index(index){
             }
 
-            virtual ~Reader(){}
+            ~Reader(){}
 
             void join() {
                 _t_reader.join();
@@ -122,16 +123,16 @@ class Listener
 
                 while(!_should_stop) {
 
-                    _do_read(_bq_sock.pop());
+                    _do_read(_bq_conn.pop());
                 }
             }
 
-            bool add(shared_ptr<tcp::socket> sock) {
-                return _bq_sock.try_push(sock);
+            bool add(shared_ptr<Connection> conn) {
+                return _bq_conn.try_push(conn);
             }
 
             void waitToFinish() {
-                while(_bq_sock.size() != 0) {
+                while(_bq_conn.size() != 0) {
                     this_thread::sleep_for(chrono::milliseconds(recheck_interval));
                 }
 

@@ -13,7 +13,7 @@ namespace Server{
     {
         public:
             Server(int);
-            virtual ~Server();
+            ~Server();
 
             void start();
 

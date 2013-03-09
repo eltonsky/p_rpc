@@ -6,7 +6,7 @@ namespace Server {
 
     const int max_num_calls = 100;
     BlockQueue<std::shared_ptr<Call>> _bq_call(max_num_calls);
-    atomic<int> last_call_id(-1);
+    //atomic<int> last_call_id(-1);
 
     Handler::Handler(short id)
     {
@@ -36,8 +36,11 @@ namespace Server {
 
             Log::write(INFO, "value is %s\n", res->toString().c_str());
 
-            if(!_bq_respond.try_push(call)) {
-                throw "FATAL: can not insert call into _bq_respond. is it full !?";
+            //add res call to connection.respondQ
+            _responder.doRespond(call);
+
+            if(!_bq_respond.try_push(call->getConnection()->index)) {
+                throw "FATAL: can not insert call's connection index into _bq_respond. is it full !?";
             }
 
             Log::write(INFO, "_bq_respond.size() %d\n", _bq_respond.size());

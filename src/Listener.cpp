@@ -45,7 +45,7 @@ namespace Server {
     }
 
 
-    void Listener::handle_accept(shared_ptr<tcp::socket>& sock,
+    void Listener::handle_accept(shared_ptr<tcp::socket> sock, shared_ptr<tcp::endpint> ep
       const boost::system::error_code& error)
     {
         Log::write(DEBUG, "Listener::handle_accept, error %s\n", error.message().c_str());
@@ -53,7 +53,7 @@ namespace Server {
         if (!error && !_should_stop)
         {
             sock.get()->async_read_some(boost::asio::null_buffers(),
-                boost::bind(&Listener::handle_read, this, sock,
+                boost::bind(&Listener::handle_read, this, sock, ep,
                   boost::asio::placeholders::error,
                   boost::asio::placeholders::bytes_transferred));
 
@@ -62,27 +62,42 @@ namespace Server {
     }
 
 
-    void Listener::handle_read(shared_ptr<tcp::socket> sock, const boost::system::error_code& error,
-              size_t bytes_transferred)
+    void Listener::handle_read(shared_ptr<tcp::socket> sock, shared_ptr<tcp::endpoint> ep
+            const boost::system::error_code& error, size_t bytes_transferred)
     {
-        Log::write(DEBUG, "handle_read: error %s\n", error.message().c_str());
+        Log::write(DEBUG, "Listener::handle_read: error %s\n", error.message().c_str());
 
         if (!error && !_should_stop)
         {
+            //create or retrieve this connection
+            shared_ptr<Connection> conn;
+            map<tcp::endpoint, shared_ptr<Connection>>::iterator iter =
+                _connections.find(*(ep.get()));
+
+            if (iter == _connections.end()) {
+                conn = make_shared<Connection>(ep, _last_connection_index++);
+
+                _connections.insert(pair<tcp::endpoint,shared_ptr<Connection>>(ep, conn));
+
+            } else {
+                conn = iter->second;
+            }
+
             //assign this socket to one of readers, roundrobin
-            if(!addToReader(sock)) {
+            if(!addToReader(conn, ep)) {
                 throw "Readers are all full. Can not add sock";
             }
         }
     }
 
 
-    bool Listener::addToReader(shared_ptr<tcp::socket> sock) {
+    bool Listener::addToReader(shared_ptr<Connection> conn,
+                               shared_ptr<tcp::endpoint> ep) {
         _last_reader_index = (_last_reader_index+1)%num_readers;
         short retry_times = 0;
 
         while(retry_times < num_readers) {
-            if(_readers[_last_reader_index].get()->add(sock)) {
+            if(_readers[_last_reader_index].get()->add(conn)) {
                 Log::write(DEBUG, "added to reader,  _last_reader_index %d\n", _last_reader_index);
 
                 return true;
@@ -132,9 +147,12 @@ namespace Server {
         {
             _curr_sock = std::shared_ptr<tcp::socket>(new tcp::socket(_io_service_listener));
 
+            shared_ptr<tcp::endpoint> ep = make_shared<tcp::endpoint>();
+
             _acceptor.async_accept(*(_curr_sock.get()),
+                *(ep.get()),
                 boost::bind(&Listener::handle_accept, this, _curr_sock,
-                boost::asio::placeholders::error));
+                ep, boost::asio::placeholders::error));
         }
     }
 

@@ -1,85 +1,91 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="include/BlockQueue.h" open="1" top="0" tabpos="20">
-		<Cursor position="1908" topLine="28" />
+	<File name="include/BlockQueue.h" open="1" top="0" tabpos="12">
+		<Cursor position="1086" topLine="36" />
 	</File>
 	<File name="include/Call.h" open="1" top="0" tabpos="4">
-		<Cursor position="618" topLine="0" />
+		<Cursor position="1425" topLine="9" />
 	</File>
-	<File name="include/Client.h" open="1" top="0" tabpos="16">
-		<Cursor position="3908" topLine="85" />
+	<File name="include/Client.h" open="1" top="0" tabpos="13">
+		<Cursor position="1468" topLine="33" />
 	</File>
 	<File name="include/Handler.h" open="1" top="0" tabpos="6">
-		<Cursor position="151" topLine="0" />
+		<Cursor position="605" topLine="0" />
 	</File>
-	<File name="include/IntWritable.h" open="1" top="0" tabpos="13">
+	<File name="include/IntWritable.h" open="0" top="0" tabpos="13">
 		<Cursor position="327" topLine="0" />
 	</File>
 	<File name="include/Listener.h" open="1" top="0" tabpos="2">
-		<Cursor position="3144" topLine="99" />
+		<Cursor position="2379" topLine="62" />
 	</File>
-	<File name="include/Log.h" open="0" top="0" tabpos="10">
-		<Cursor position="701" topLine="0" />
+	<File name="include/Log.h" open="0" top="0" tabpos="25">
+		<Cursor position="428" topLine="0" />
 	</File>
-	<File name="include/Method.h" open="1" top="0" tabpos="14">
-		<Cursor position="187" topLine="0" />
+	<File name="include/Method.h" open="0" top="0" tabpos="14">
+		<Cursor position="211" topLine="0" />
 	</File>
-	<File name="include/MethodWritable.h" open="1" top="0" tabpos="18">
+	<File name="include/MethodWritable.h" open="1" top="0" tabpos="15">
 		<Cursor position="282" topLine="0" />
 	</File>
-	<File name="include/Server.h" open="1" top="0" tabpos="9">
-		<Cursor position="255" topLine="0" />
+	<File name="include/Responder.h" open="1" top="1" tabpos="10">
+		<Cursor position="582" topLine="0" />
+	</File>
+	<File name="include/Server.h" open="1" top="0" tabpos="8">
+		<Cursor position="332" topLine="0" />
+	</File>
+	<File name="include/Test1.h" open="0" top="0" tabpos="22">
+		<Cursor position="168" topLine="0" />
 	</File>
 	<File name="include/Utils.h" open="0" top="0" tabpos="6">
 		<Cursor position="147" topLine="0" />
 	</File>
-	<File name="include/Writable.h" open="1" top="0" tabpos="10">
-		<Cursor position="39" topLine="0" />
+	<File name="include/Writable.h" open="0" top="0" tabpos="10">
+		<Cursor position="316" topLine="0" />
 	</File>
 	<File name="main.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="1954" topLine="35" />
+		<Cursor position="1846" topLine="15" />
 	</File>
 	<File name="src/BlockQueue.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="25" topLine="0" />
 	</File>
 	<File name="src/Call.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="394" topLine="0" />
+		<Cursor position="521" topLine="48" />
 	</File>
-	<File name="src/Client.cpp" open="1" top="0" tabpos="17">
-		<Cursor position="740" topLine="0" />
+	<File name="src/Client.cpp" open="1" top="0" tabpos="14">
+		<Cursor position="1573" topLine="91" />
 	</File>
 	<File name="src/Handler.cpp" open="1" top="0" tabpos="7">
-		<Cursor position="940" topLine="0" />
+		<Cursor position="1030" topLine="0" />
 	</File>
-	<File name="src/IntWritable.cpp" open="1" top="0" tabpos="12">
+	<File name="src/IntWritable.cpp" open="0" top="0" tabpos="12">
 		<Cursor position="266" topLine="0" />
 	</File>
 	<File name="src/Listener.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="677" topLine="0" />
+		<Cursor position="547" topLine="9" />
 	</File>
-	<File name="src/Log.cpp" open="0" top="0" tabpos="11">
-		<Cursor position="2065" topLine="60" />
+	<File name="src/Log.cpp" open="0" top="0" tabpos="24">
+		<Cursor position="346" topLine="0" />
 	</File>
-	<File name="src/Method.cpp" open="1" top="0" tabpos="15">
-		<Cursor position="55" topLine="0" />
+	<File name="src/Method.cpp" open="0" top="0" tabpos="15">
+		<Cursor position="487" topLine="0" />
 	</File>
-	<File name="src/MethodWritable.cpp" open="1" top="0" tabpos="19">
-		<Cursor position="1003" topLine="0" />
+	<File name="src/MethodWritable.cpp" open="1" top="0" tabpos="16">
+		<Cursor position="1351" topLine="36" />
 	</File>
-	<File name="src/Responder.cpp" open="1" top="0" tabpos="21">
-		<Cursor position="1144" topLine="3" />
+	<File name="src/Responder.cpp" open="1" top="0" tabpos="11">
+		<Cursor position="1270" topLine="12" />
 	</File>
-	<File name="src/Server.cpp" open="1" top="0" tabpos="8">
-		<Cursor position="373" topLine="0" />
+	<File name="src/Server.cpp" open="1" top="0" tabpos="9">
+		<Cursor position="254" topLine="0" />
 	</File>
-	<File name="src/Test1.cpp" open="1" top="1" tabpos="22">
-		<Cursor position="1317" topLine="0" />
+	<File name="src/Test1.cpp" open="1" top="0" tabpos="17">
+		<Cursor position="417" topLine="5" />
 	</File>
 	<File name="src/Utils.cpp" open="0" top="0" tabpos="5">
 		<Cursor position="97" topLine="0" />
 	</File>
-	<File name="src/Writable.cpp" open="1" top="0" tabpos="11">
+	<File name="src/Writable.cpp" open="0" top="0" tabpos="11">
 		<Cursor position="873" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>

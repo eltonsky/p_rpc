@@ -8,6 +8,8 @@ Test1::Test1()
 }
 
 bool Test1::test1(string server_host, int port, int rep) {
+    Log::write(INFO, "##Start thread %ld \n" , (long int)syscall(SYS_gettid));
+
     // get endponit
     boost::system::error_code error;
     boost::asio::ip::address_v4 targetIP;
@@ -28,7 +30,7 @@ bool Test1::test1(string server_host, int port, int rep) {
         MethodWritable* mw = new MethodWritable("FSNameSystem", "create", params);
         shared_ptr<Writable> w = shared_ptr<MethodWritable>(mw);
 
-        shared_ptr<Writable> val = client.call(w, "IntWritable");
+        shared_ptr<Writable> val = client.call(w, "IntWritable",ep);
         Log::write(INFO, "In thread %ld : %d #### CLIENT RESULT : %s\n" , (long int)syscall(SYS_gettid), i ,val->toString().c_str());
     }
 

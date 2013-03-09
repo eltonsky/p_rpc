@@ -24,7 +24,8 @@ using namespace std;
 
 Server::Server* server_ptr;
 atomic<bool> teminated(false);
-const string log_conf = "./conf/log4cpp.properties";
+const string server_log_conf = "./conf/server.properties";
+const string client_log_conf = "./conf/client.properties";
 
 void terminate(int signum) {
     if(signum == SIGINT && teminated == false) {
@@ -53,17 +54,15 @@ int main(int argc, char** argv)
     string server_host;
     int port = -1;
 
-    // init log
-    Log::init(log_conf);
 
     if (argc < 2)
     {
-        Log::write(ERROR, "Is this client or server? <type> required.");
+        cout<<"Is this client or server? <type> required."<<endl;
         return -1;
 
     } else if(strcmp(argv[1],"-c") == 0) {
         if (argc < 4) {
-            Log::write(ERROR, "Client Usage: ./bin <type> <server_host> <port>.");
+            cout<<"Client Usage: ./bin <type> <server_host> <port>"<<endl;
             return -1;
         }
 
@@ -73,25 +72,33 @@ int main(int argc, char** argv)
 
     } else if (strcmp(argv[1], "-s") ==0) {
         if(argc < 3) {
-            Log::write(ERROR, "Server Usage: ./bin <type> <port>");
+            cout<<"Server Usage: ./bin <type> <port>"<<endl;
             return -1;
         }
 
         port = atoi(argv[2]);
     } else {
-        Log::write(ERROR, "Unrecognized type %s.", argv[1]);
+        cout<< "Unrecognized type '" << argv[1]<<"'"<<endl;
         return -1;
     }
 
     try {
 
         if(!ifServer) {
+
+            // init log
+            Log::init(client_log_conf);
+
             Test1 t1;
-            t1.test2(server_host, port, 20, 1000);
+            t1.test2(server_host, port, 4, 5);
 
             //t1.test2(server_host, port);
 
         } else {
+
+            // init log
+            Log::init(server_log_conf);
+
             signal(SIGINT, terminate);
 
             Server::Server serv(port);
@@ -109,6 +116,12 @@ int main(int argc, char** argv)
     Log::write(INFO, "Finish !\n");
     return 0;
 }
+
+
+
+
+
+
 
 
 

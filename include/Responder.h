@@ -10,7 +10,7 @@ using namespace std;
 
 namespace Server{
 
-    extern BlockQueue<std::shared_ptr<Call>> _bq_respond;
+    extern BlockQueue<int> _bq_respond;
 
     class Responder
     {
@@ -18,7 +18,7 @@ namespace Server{
             bool _should_stop = false;
 
             Responder();
-            virtual ~Responder();
+            ~Responder();
 
             void start();
 
@@ -26,9 +26,18 @@ namespace Server{
 
             void waitToFinish();
 
+            bool doRespond(shared_ptr<Call>);
+
+            bool doAsyncWrite();
+
+            bool processResponse(BlockQueue<Call> queue);
+
         protected:
         private:
             boost::thread _t_responder;
+
+            std::mutex _mutex;
+            std::condition_variable _cond;
     };
 
 }

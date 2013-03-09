@@ -2,6 +2,7 @@
 #define LOG_H
 #include <pthread.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 #include "log4cpp/Category.hh"
 #include "log4cpp/Appender.hh"
@@ -12,6 +13,7 @@
 #include "log4cpp/Priority.hh"
 #include <log4cpp/PropertyConfigurator.hh>
 #include <stdarg.h>
+#include <exception>
 
 using namespace std;
 

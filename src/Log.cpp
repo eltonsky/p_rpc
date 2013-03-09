@@ -10,31 +10,39 @@ void Log::init(string confFile)
 
 Log::~Log()
 {
-    log4cpp::Category::getRoot().shutdown();
+    try{
+        log4cpp::Category::getRoot().shutdown();
+    } catch(exception& e) {
+        cout<<"Failed to shut down log4cpp : " << e.what()<<endl;
+        std::abort();
+    }
 }
 
 
 void Log::write(string msg){
     log4cpp::Category& root = log4cpp::Category::getRoot();
 
+    stringstream ss;
+    ss<<"<"<<(long int)syscall(SYS_gettid)<<"> "<<msg;
+
     switch(defaultLogLevel){
         case DEBUG:
-            root.debug(msg);
+            root.debug(ss.str());
             break;
         case INFO:
-            root.info(msg);
+            root.info(ss.str());
             break;
         case NOTICE:
-            root.notice(msg);
+            root.notice(ss.str());
             break;
         case WARN:
-            root.warn(msg);
+            root.warn(ss.str());
             break;
         case ERROR:
-            root.error(msg);
+            root.error(ss.str());
             break;
         default:
-            root.error(msg);
+            root.error(ss.str());
     }
 }
 
@@ -42,24 +50,27 @@ void Log::write(string msg){
 void Log::write(LogLevel level, string msg){
     log4cpp::Category& root = log4cpp::Category::getRoot();
 
+    stringstream ss;
+    ss<<"<"<<(long int)syscall(SYS_gettid)<<"> "<<msg;
+
     switch(level){
         case DEBUG:
-            root.debug(msg);
+            root.debug(ss.str());
             break;
         case INFO:
-            root.info(msg);
+            root.info(ss.str());
             break;
         case NOTICE:
-            root.notice(msg);
+            root.notice(ss.str());
             break;
         case WARN:
-            root.warn(msg);
+            root.warn(ss.str());
             break;
         case ERROR:
-            root.error(msg);
+            root.error(ss.str());
             break;
         default:
-            root.error(msg);
+            root.error(ss.str());
     }
 }
 
@@ -73,24 +84,27 @@ void Log::write(const char* format, ...){
     getString(format,va, str);
     va_end(va);
 
+    stringstream ss;
+    ss<<"<"<<(long int)syscall(SYS_gettid)<<"> "<<str;
+
     switch(defaultLogLevel){
         case DEBUG:
-            root.debug(str);
+            root.debug(ss.str());
             break;
         case INFO:
-            root.info(str);
+            root.info(ss.str());
             break;
         case NOTICE:
-            root.notice(str);
+            root.notice(ss.str());
             break;
         case WARN:
-            root.warn(str);
+            root.warn(ss.str());
             break;
         case ERROR:
-            root.error(str);
+            root.error(ss.str());
             break;
         default:
-            root.error(str);
+            root.error(ss.str());
     }
 }
 
@@ -104,24 +118,27 @@ void Log::write(LogLevel level, const char* format, ...){
     getString(format,va, str);
     va_end(va);
 
+    stringstream ss;
+    ss<<"<"<<(long int)syscall(SYS_gettid)<<"> "<<str;
+
     switch(level){
         case DEBUG:
-            root.debug(str);
+            root.debug(ss.str());
             break;
         case INFO:
-            root.info(str);
+            root.info(ss.str());
             break;
         case NOTICE:
-            root.notice(str);
+            root.notice(ss.str());
             break;
         case WARN:
-            root.warn(str);
+            root.warn(ss.str());
             break;
         case ERROR:
-            root.error(str);
+            root.error(ss.str());
             break;
         default:
-            root.error(str);
+            root.error(ss.str());
     }
 }
 

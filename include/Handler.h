@@ -10,7 +10,7 @@
 
 namespace Server{
 
-    extern atomic<int> last_call_id;
+//    extern atomic<int> last_call_id;
     extern BlockQueue<std::shared_ptr<Call>> _bq_call;
 
     class Handler
@@ -19,7 +19,7 @@ namespace Server{
             bool _should_stop = false;
 
             Handler(short id);
-            virtual ~Handler();
+            ~Handler();
 
             void start();
 
@@ -27,10 +27,15 @@ namespace Server{
 
             void waitToFinish();
 
+            inline void setResponder(Responder* resp) {
+                _responder = resp;
+            }
+
         protected:
         private:
             boost::thread _t_handler;
             short _handler_id;
+            Responder* _responder;
     };
 }
 
