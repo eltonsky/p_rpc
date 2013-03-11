@@ -110,11 +110,13 @@ namespace Server {
 
         while(retry_times < num_readers) {
             if(_readers[_last_reader_index].get()->add(conn)) {
-                Log::write(DEBUG, "added to reader,  _last_reader_index %d\n", _last_reader_index);
+                Log::write(DEBUG, "added to reader,  _last_reader_index %d\n",
+                            _last_reader_index);
 
                 return true;
             } else {
-                Log::write(ERROR, "Failed to add to reader! _last_reader_index %d\n", _last_reader_index);
+                Log::write(ERROR, "Failed to add to reader! _last_reader_index %d\n",
+                           _last_reader_index);
             }
 
             _last_reader_index = (_last_reader_index+1)%num_readers;

@@ -53,7 +53,8 @@ namespace Server {
             }
 
         } catch(exception& e) {
-            Log::write(ERROR, "Exception when read a call <%s> : %s\n", toString().c_str(), e.what());
+            Log::write(ERROR, "Exception when read a call <%s> : %s\n",
+                       toString().c_str(), e.what());
             return false;
         }
 

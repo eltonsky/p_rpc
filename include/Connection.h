@@ -24,6 +24,7 @@ namespace Server {
         shared_ptr<tcp::socket> _sock;
         shared_ptr<tcp::endpoint> _ep;
         std::mutex _mutex;
+        const int _max_respond_size = 100;
 
     public:
         BlockQueue<shared_ptr<Call>> respond_queue;
@@ -32,7 +33,7 @@ namespace Server {
         Connection(shared_ptr<tcp::socket> sock,
                    shared_ptr<tcp::endpoint> ep, int i);
 
-        int processResponse();
+        int processResponse(shared_ptr<Call>);
 
         void close();
 

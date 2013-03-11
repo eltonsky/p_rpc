@@ -97,8 +97,14 @@ namespace Server{
             return false;
         }
 
+
+cout<<"Before call->getConnection()->processResponse();"<<endl;
+
         //write some, for max throughput
-        int res = call->getConnection()->processResponse();
+        int res = conn->processResponse(call);
+
+cout<<"After call->getConnection()->processResponse();"<<endl;
+
         if(res < 0) {
             Log::write(ERROR, "Failed to process a call response <Connection:%d>, <call:%d>\n",
                        conn->index, call->getId());

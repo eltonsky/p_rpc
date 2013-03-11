@@ -127,6 +127,8 @@ class Client
             boost::thread _t_recv_respond;
             boost::asio::io_service _io_service;
             tcp::socket* _sock;
+            const int _max_conn_calls = 100;
+            shared_ptr<tcp::endpoint> _ep;
 
         public:
             std::mutex _mutex_conn;
@@ -143,6 +145,14 @@ class Client
             void recvRespond(shared_ptr<Call>);
 
             void recvStart();
+
+            inline string toString() {
+                stringstream ss;
+                ss <<_ep->address().to_string();
+                ss <<":";
+                ss<<_ep->port();
+                return ss.str();
+            }
 
             inline tcp::socket* getSock() const{
                 return _sock;

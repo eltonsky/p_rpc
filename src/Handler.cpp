@@ -38,7 +38,9 @@ namespace Server {
             Log::write(INFO, "value is %s\n", res->printToString().c_str());
 
             //add res call to connection.respondQ
-            _responder->doRespond(call);
+            if(!_responder->doRespond(call)) {
+                std::abort();
+            }
         }
     }
 

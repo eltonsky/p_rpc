@@ -7,7 +7,9 @@ bool Client::_should_stop = false;
 
 /// Client::Connection
 
-Client::Connection::Connection(shared_ptr<tcp::endpoint> ep){
+Client::Connection::Connection(shared_ptr<tcp::endpoint> ep) :
+                                _ep(ep) ,
+                                bq_conn_calls(_max_conn_calls) {
     bool connected = true;
 
     try{
@@ -69,18 +71,38 @@ void Client::Connection::recvStart() {
 
 void Client::Connection::recvRespond(shared_ptr<Call> curr_call) {
 
-    shared_ptr<Writable> val = curr_call->getValue();
+    shared_ptr<Writable> val = Method::getNewInstance(curr_call->getValueClass());
 
-    val = Method::getNewInstance(curr_call->getValueClass());
+    int curr_call_id = -1;
 
     try{
+
+        size_t l = boost::asio::read(*_sock,
+            boost::asio::buffer(&curr_call_id, sizeof(curr_call_id)));
+
+        if(l<=0) {
+            Log::write(ERROR, "Failed to read call_id from connection <%s>\n",
+                        this->toString().c_str());
+            std::abort();
+        }else if(curr_call_id != curr_call->getId()) {
+            Log::write(ERROR,
+                       "Unmatched call id. curr call id is %d, received call id is %d.\n",
+                        curr_call->getId(), curr_call_id);
+            std::abort();
+        }
+
+        Log::write(DEBUG, "curr_call_id is %d, curr_call's id is %d\n",
+                    curr_call_id, curr_call->getId());
+
         val->readFields(_sock);
 
         curr_call->setValue(val);
     }catch(exception& e){
-        Log::write(ERROR, "Failed to read value for call %d and set value.\n", curr_call->getId());
+        Log::write(ERROR, "Failed to read value for call %d and set value - %s\n",
+                    curr_call->getId(), e.what());
     }
 }
+
 
 //not used.
 bool Client::Connection::waitForWork() {
@@ -128,7 +150,7 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
 
     sendCall(call.get());
 
-    Log::write(INFO, "curr_conn->bq_conn_calls.size() %d\n",
+    Log::write(DEBUG, "curr_conn->bq_conn_calls.size() %d\n",
                curr_conn->bq_conn_calls.size());
 
     while(!_should_stop && !call->getDone()) {
@@ -167,8 +189,6 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
         Log::write(ERROR, "FATAL: can not insert call into bq_conn_calls. is it full !?");
         return NULL;
     }
-
-    conn->_cond_conn.notify_all();
 
     call->setId(conn->last_call_index++);
     call->setConnection(conn);

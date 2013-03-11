@@ -10,18 +10,16 @@ namespace Server{
 
     Connection::Connection(shared_ptr<tcp::socket> sock,
                    shared_ptr<tcp::endpoint> ep, int i) :
-                   _sock(sock), _ep(ep), index(i) {}
+                   _sock(sock), _ep(ep),
+                   respond_queue(_max_respond_size), index(i) {}
 
 
     // write in a async fasion:
     // add the call back to queue if it's not fully sent
-    int Connection::processResponse() {
-        shared_ptr<Call> call;
+    int Connection::processResponse(shared_ptr<Call> call) {
 
         try {
             std::unique_lock<std::mutex> ulock(_mutex);
-
-            call = respond_queue.pop();
 
             tcp::socket* sock = _sock.get();
 
@@ -44,7 +42,13 @@ namespace Server{
 
             const char* start = call->getValue().c_str() + curr_pos;
 
+            Log::write(DEBUG,
+                       "Connection::processResponse : call id %d, length %d, curr_pos %d, value %s\n",
+                       call->getId(), length, curr_pos, call->getValue().c_str());
+
             wrote = sock->write_some(boost::asio::buffer(start, (length - curr_pos)));
+
+            Log::write(DEBUG, "wrote is %d, start %s\n", wrote, start);
 
             // if didn't write all data, add the call back to respond_queue
             // and move on to next connection.
