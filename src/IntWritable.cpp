@@ -27,8 +27,15 @@ int IntWritable::write(tcp::socket * sock){
 }
 
 
-string IntWritable::toString() {
+string IntWritable::printToString() {
     return std::to_string(_value);
+}
+
+
+string IntWritable::toString() {
+    stringstream ss;
+    ss<<_value;
+    return ss.str();
 }
 
 

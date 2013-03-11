@@ -45,7 +45,7 @@ namespace Server {
     }
 
 
-    void Listener::handle_accept(shared_ptr<tcp::socket> sock, shared_ptr<tcp::endpint> ep
+    void Listener::handle_accept(shared_ptr<tcp::socket> sock, shared_ptr<tcp::endpoint> ep,
       const boost::system::error_code& error)
     {
         Log::write(DEBUG, "Listener::handle_accept, error %s\n", error.message().c_str());
@@ -62,7 +62,7 @@ namespace Server {
     }
 
 
-    void Listener::handle_read(shared_ptr<tcp::socket> sock, shared_ptr<tcp::endpoint> ep
+    void Listener::handle_read(shared_ptr<tcp::socket> sock, shared_ptr<tcp::endpoint> ep,
             const boost::system::error_code& error, size_t bytes_transferred)
     {
         Log::write(DEBUG, "Listener::handle_read: error %s\n", error.message().c_str());
@@ -71,28 +71,40 @@ namespace Server {
         {
             //create or retrieve this connection
             shared_ptr<Connection> conn;
-            map<tcp::endpoint, shared_ptr<Connection>>::iterator iter =
-                _connections.find(*(ep.get()));
 
-            if (iter == _connections.end()) {
-                conn = make_shared<Connection>(ep, _last_connection_index++);
+            try{
 
-                _connections.insert(pair<tcp::endpoint,shared_ptr<Connection>>(ep, conn));
+                _mutex_conns.lock();
 
-            } else {
-                conn = iter->second;
+                map<shared_ptr<tcp::endpoint>, shared_ptr<Connection>>::iterator iter =
+                    _connections.find(ep);
+
+                if (iter == _connections.end()) {
+                    conn = make_shared<Connection>(sock, ep, _last_connection_index++);
+
+                    _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Connection>>(ep, conn));
+
+                } else {
+                    conn = iter->second;
+                }
+
+                _mutex_conns.unlock();
+
+                //assign this socket to one of readers, roundrobin
+                if(!addToReader(conn)) {
+                    throw "Readers are all full. Can not add sock";
+                }
+
+            }catch(exception& e){
+                _mutex_conns.unlock();
+                Log::write(ERROR, "Failed to read a call\n.");
             }
 
-            //assign this socket to one of readers, roundrobin
-            if(!addToReader(conn, ep)) {
-                throw "Readers are all full. Can not add sock";
-            }
         }
     }
 
 
-    bool Listener::addToReader(shared_ptr<Connection> conn,
-                               shared_ptr<tcp::endpoint> ep) {
+    bool Listener::addToReader(shared_ptr<Connection> conn) {
         _last_reader_index = (_last_reader_index+1)%num_readers;
         short retry_times = 0;
 

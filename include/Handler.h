@@ -10,7 +10,6 @@
 
 namespace Server{
 
-//    extern atomic<int> last_call_id;
     extern BlockQueue<std::shared_ptr<Call>> _bq_call;
 
     class Handler

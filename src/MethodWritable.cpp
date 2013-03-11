@@ -89,8 +89,12 @@ int MethodWritable::write(tcp::socket * sock){
 }
 
 
+string MethodWritable::toString(){
+    return NULL;
+}
 
-string MethodWritable::toString() {
+
+string MethodWritable::printToString() {
     string str;
     str.append("class : ");
     str.append(_class_name);

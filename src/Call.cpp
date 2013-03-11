@@ -1,7 +1,9 @@
 #include "Call.h"
 
 namespace Server {
+    const int recheck_interval = 100;
 
+    ////Call
     Call::Call()
     {
         //ctor
@@ -15,11 +17,11 @@ namespace Server {
         if(_connection.get() == NULL)
             return false;
 
-        tcp::socket* sock = _connection->getSock()->get();
+        tcp::socket* sock = _connection->getSock().get();
 
         try{
             size_t l = boost::asio::read(*(sock),
-                boost::asio::buffer(&_curr_id, sizeof(_curr_id)));
+                boost::asio::buffer(&_call_id, sizeof(_call_id)));
              if(l <= 0) {
                 Log::write(ERROR, "Fail to read call id\n");
                 return -1;
@@ -62,12 +64,15 @@ namespace Server {
     bool Call::write() {
 
         try{
-            //just write value back for now.
-            _value->write(_sock.get());
+            tcp::socket* sock = _connection->getSock().get();
+
+            boost::asio::write(*sock, boost::asio::buffer((const char*)&_call_id, sizeof(_call_id)));
+
+            Writable::writeString(sock, _strVal);
         }
          catch(exception& e) {
             Log::write(ERROR, "Exception when write a call result <%s : %s> : %s \n",
-                       toString().c_str(), _value.get()->toString().c_str(), e.what());
+                       toString().c_str(), _strVal.c_str(), e.what());
             return false;
         }
 
@@ -100,3 +105,11 @@ namespace Server {
     }
 
 }
+
+
+
+
+
+
+
+

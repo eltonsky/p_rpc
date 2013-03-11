@@ -22,6 +22,7 @@ class IntWritable : public Writable
         virtual int readFields(tcp::socket * sock);
         virtual int write(tcp::socket * sock);
         virtual string toString();
+        virtual string printToString();
         virtual string getClass();
         inline int get() {return _value;}
 

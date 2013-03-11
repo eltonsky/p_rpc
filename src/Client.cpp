@@ -5,25 +5,31 @@
 const long Client::_call_wait_time = 100;
 bool Client::_should_stop = false;
 
-Client::Client(tcp::endpoint ep)
-    : _server_ep(ep){}
+/// Client::Connection
 
-
-Client::Connection::Connection(tcp::endpoint ep){
+Client::Connection::Connection(shared_ptr<tcp::endpoint> ep){
     bool connected = true;
 
     try{
         tcp::resolver resolver(_io_service);
-        tcp::resolver::query query(tcp::v4(), ep.address().to_string(), std::to_string(ep.port()));
+        tcp::resolver::query query(tcp::v4(),
+                                    ep->address().to_string(),
+                                    std::to_string(ep->port()));
         tcp::resolver::iterator iterator = resolver.resolve(query);
 
         _sock = new tcp::socket(_io_service);
+
         _sock->connect(*iterator);
 
-        Log::write(INFO, "Client connected to %s : %d\n", ep.address().to_string().c_str(), ep.port());
+        Log::write(INFO, "Client connected to %s : %d\n",
+                   ep->address().to_string().c_str(),
+                   ep->port());
 
     } catch(...) {
-        Log::write(ERROR, "Failed to connect to %s : %d\n", ep.address().to_string().c_str(), ep.port());
+
+        Log::write(ERROR, "Failed to connect to %s : %d\n",
+                   ep->address().to_string().c_str(),
+                    ep->port());
 
         connected = false;
     }
@@ -33,6 +39,7 @@ Client::Connection::Connection(tcp::endpoint ep){
             // start recv thread
             _t_recv_respond =
                 boost::thread(boost::bind(&Client::Connection::recvStart,this));
+
         }catch(exception& e){
             Log::write(ERROR, "Failed to start thread _t_recv_respond.\n");
         }
@@ -47,26 +54,20 @@ Client::Connection::~Connection() {
 
 
 void Client::Connection::recvStart() {
-    Log::write(INFO, "Connection receiver thread started. <thread id : %ld>, <pid : %d> \n", (long int)syscall(SYS_gettid), getpid());
+    Log::write(INFO, "Connection receiver thread started. <thread id : %ld>, <pid : %d> \n",
+               (long int)syscall(SYS_gettid), getpid());
 
     while(!_should_stop) {
-        if(waitForWork()) {
+        shared_ptr<Call> curr_call = bq_conn_calls.pop();
 
-            Log::write(DEBUG, "Got call in Connection\n");
+        Log::write(DEBUG, "Got call in Connection\n");
 
-            recvRespond();
-
-        } else {
-            //should stop
-            break;
-        }
+        recvRespond(curr_call);
     }
 }
 
 
-void Client::Connection::recvRespond() {
-
-    shared_ptr<Call> curr_call = bq_conn_calls.pop();
+void Client::Connection::recvRespond(shared_ptr<Call> curr_call) {
 
     shared_ptr<Writable> val = curr_call->getValue();
 
@@ -81,7 +82,7 @@ void Client::Connection::recvRespond() {
     }
 }
 
-
+//not used.
 bool Client::Connection::waitForWork() {
     std::unique_lock<std::mutex> ulock(_mutex_conn);
 
@@ -100,19 +101,28 @@ bool Client::Connection::waitForWork() {
 }
 
 
+/// Client
+
+Client::Client(shared_ptr<tcp::endpoint> ep)
+    : _server_ep(ep){}
+
+
 void Client::stop() {
     Log::write(INFO, "Client receiver finished\n");
 }
 
 
-shared_ptr<Writable> Client::call(shared_ptr<Writable> param, string v_class, tcp::endpoint ep) {
+shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
+                                  string v_class,
+                                  shared_ptr<tcp::endpoint> ep) {
 
     shared_ptr<Call> call(new Call(param, v_class));
     shared_ptr<Connection> curr_conn;
 
     if((curr_conn = getConnection(ep, call)) == NULL) {
         Log::write(ERROR, "Can not connect to endpoint  %s : %d \n",
-                   _server_ep.address().to_string().c_str(), _server_ep.port());
+                   _server_ep->address().to_string().c_str(),
+                   _server_ep->port());
         return NULL;
     }
 
@@ -129,18 +139,20 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param, string v_class, tc
 }
 
 
-shared_ptr<Client::Connection> Client::getConnection(tcp::endpoint ep, shared_ptr<Call> call) {
+shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> ep,
+                                                     shared_ptr<Call> call) {
     std::unique_lock<std::mutex> ulock(_mutex_client);
 
     shared_ptr<Client::Connection> conn;
 
     try{
-        map<tcp::endpoint,shared_ptr<Client::Connection>>::iterator iter = _connections.find(ep);
+        map<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>::iterator iter =
+            _connections.find(ep);
 
         if(iter == _connections.end()) {
             conn = make_shared<Client::Connection>(ep);
 
-            _connections.insert(pair<tcp::endpoint,shared_ptr<Client::Connection>>(ep,conn));
+            _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>(ep,conn));
         } else {
             conn = iter->second;
         }
@@ -155,6 +167,8 @@ shared_ptr<Client::Connection> Client::getConnection(tcp::endpoint ep, shared_pt
         Log::write(ERROR, "FATAL: can not insert call into bq_conn_calls. is it full !?");
         return NULL;
     }
+
+    conn->_cond_conn.notify_all();
 
     call->setId(conn->last_call_index++);
     call->setConnection(conn);

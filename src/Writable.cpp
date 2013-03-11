@@ -16,6 +16,9 @@ int Writable::write(tcp::socket * sock) {return 0;}
 
 string Writable::toString() {return NULL;}
 
+string Writable::printToString() {return NULL;}
+
+
 int Writable::writeString(tcp::socket*sock, string str) {
     int length = str.size();
 

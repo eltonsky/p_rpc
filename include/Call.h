@@ -11,22 +11,22 @@
 #include <string>
 #include "IntWritable.h"
 #include "BlockQueue.h"
+#include "Connection.h"
 
 using namespace std;
 using boost::asio::ip::tcp;
 
 namespace Server{
+
     class Connection;
 
-    static int _last_connection_index = 0;
-    const int recheck_interval = 100;
-    map<tcp::endpoint, shared_ptr<Connection>> _connections;
+    extern const int recheck_interval;
 
     class Call
     {
         public:
             Call();
-            Call(shared_ptr<tcp::socket> sock);
+            Call(shared_ptr<Connection> conn);
             ~Call();
             bool read();
             bool write();
@@ -39,13 +39,19 @@ namespace Server{
             inline const string getClass() const {return _class;}
             inline const string getMethod() const {return _method;}
             inline const vector<shared_ptr<Writable>> getParams() const {return _params;}
-            void setValue(shared_ptr<Writable> v) {
-                _value = v;
+
+            inline void setValue(shared_ptr<Writable> v) {
+                _strVal = v->toString();
             }
-            inline const Writable* getValue() const {return _value.get();}
-            inline const tcp::socket* getSock() const {return _connection->getSock()->get();}
+
+            inline const string getValue() const {return _strVal;}
+            inline const tcp::socket* getSock() const {return _connection->getSock().get();}
             inline void setConnection(shared_ptr<Connection> conn) {_connection = conn;}
+            inline shared_ptr<Connection> getConnection() const {return _connection;}
             inline void setId(int id) {_call_id = id;}
+            inline int getId() {return _call_id;}
+            inline void setPos(int pos) {_pos = pos;}
+            inline int getPos() {return _pos;}
 
         protected:
         private:
@@ -55,36 +61,10 @@ namespace Server{
             string _class;
             string _method;
             vector<shared_ptr<Writable>> _params;
-            shared_ptr<Writable> _value;
+            //shared_ptr<Writable> _value;
+            int _pos = 0; // the pos to start writing again, for a async mode
+            string _strVal;
     };
-
-
-    class Connection{
-
-        shared_ptr<tcp::socket> _sock;
-        shared_ptr<tcp::endpoint> _ep;
-
-    public:
-        BlockQueue<shared_ptr<Call>> respond_queue;
-        int index;
-
-        Connection(tcp::socket sock, tcp::endpoint ep, int i);
-
-        void close();
-
-        string toString();
-        inline tcp::socket* getSock() const{
-            return _sock.get();
-        }
-
-        inline tcp::endpoint* getEndpoing() const {
-            return _ep.get();
-        }
-
-    };
-
-
-
 
 }
 

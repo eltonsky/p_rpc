@@ -33,7 +33,8 @@ class Listener
 
         Listener(int port);
 
-        //remove virtual from all pipeline classes, coz they will not be inherited anyway.
+        // remove virtual from all pipeline classes,
+        // coz they will not be inherited anyway.
         ~Listener();
 
         void run();
@@ -44,13 +45,16 @@ class Listener
 
         void join();
 
-        void handle_read(shared_ptr<tcp::socket> sock, const boost::system::error_code& error,
-              size_t bytes_transferred);
+        void handle_read(shared_ptr<tcp::socket> sock,
+                         shared_ptr<tcp::endpoint> ep,
+                         const boost::system::error_code& error,
+                            size_t bytes_transferred);
 
-        void handle_accept(shared_ptr<tcp::socket>& sock,
-            const boost::system::error_code& error);
+        void handle_accept(shared_ptr<tcp::socket> sock,
+                           shared_ptr<tcp::endpoint> ep,
+                            const boost::system::error_code& error);
 
-        bool addToReader(shared_ptr<tcp::socket> sock);
+        bool addToReader(shared_ptr<Connection> conn);
 
     private:
 
@@ -77,15 +81,13 @@ class Listener
 
                 try{
                     //try to read a full call object
-                    Call* call = new Call(conn);
+                    shared_ptr<Call> s_call = make_shared<Call>(conn);
 
-                    if(!call->read()){
+                    if(!s_call->read()){
                         throw "Failed to read call in Reader";
                     }
 
-                    Log::write(DEBUG, "Reader %d get call %s\n", _reader_index, call->toString().c_str());
-
-                    shared_ptr<Call> s_call(call);
+                    Log::write(DEBUG, "Reader %d get call %s\n", _reader_index, s_call->toString().c_str());
 
                     if(!_bq_call.try_push(s_call)) {
                         throw "FATAL: can not insert call into _bq_call. is it full !?";

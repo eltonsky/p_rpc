@@ -126,20 +126,22 @@ class Client
         class Connection {
             boost::thread _t_recv_respond;
             boost::asio::io_service _io_service;
-
-            std::mutex _mutex_conn;
-            std::condition_variable _cond_conn;
             tcp::socket* _sock;
 
         public:
+            std::mutex _mutex_conn;
+            std::condition_variable _cond_conn;
+
             int last_call_index = 0; //only used in Client::getConnection()
             BlockQueue<shared_ptr<Call>> bq_conn_calls;
 
-            Connection(tcp::endpoint);
+            Connection(shared_ptr<tcp::endpoint>);
             ~Connection();
 
-            bool waitForWork();
-            void recvRespond();
+            bool waitForWork(); // not used.
+
+            void recvRespond(shared_ptr<Call>);
+
             void recvStart();
 
             inline tcp::socket* getSock() const{
@@ -150,12 +152,12 @@ class Client
 
         int _last_connection_index = 0;
         const int _max_connection_num = 32768;
-        map<tcp::endpoint,shared_ptr<Connection>> _connections;
+        map<shared_ptr<tcp::endpoint>,shared_ptr<Connection>> _connections;
 
-        tcp::endpoint& _server_ep;
+        shared_ptr<tcp::endpoint> _server_ep;
         const int _max_client_calls = 100;
-        static const long _call_wait_time;
 
+        static const long _call_wait_time;
         static bool _should_stop;
 
         std::mutex _mutex_client;
@@ -163,18 +165,21 @@ class Client
 
     public:
 
-        Client(tcp::endpoint ep);
+        Client(shared_ptr<tcp::endpoint> ep);
         Client();
 
         void sendCall(Call* call);
 
-        shared_ptr<Writable> call(shared_ptr<Writable> param, string value_class, tcp::endpoint);
+        shared_ptr<Writable> call(shared_ptr<Writable> param,
+                                  string value_class,
+                                  shared_ptr<tcp::endpoint>);
 
         void start();
 
         void stop();
 
-        shared_ptr<Connection> getConnection(tcp::endpoint ep, shared_ptr<Call>);
+        shared_ptr<Connection> getConnection(shared_ptr<tcp::endpoint>,
+                                             shared_ptr<Call>);
 
         ~Client();
 };

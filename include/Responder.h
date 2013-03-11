@@ -10,7 +10,8 @@ using namespace std;
 
 namespace Server{
 
-    extern BlockQueue<int> _bq_respond;
+    extern BlockQueue<shared_ptr<tcp::endpoint>> _bq_respond;
+    const int _resp_wait_time = 100;
 
     class Responder
     {
@@ -26,18 +27,20 @@ namespace Server{
 
             void waitToFinish();
 
+            bool waitForWork();
+
             bool doRespond(shared_ptr<Call>);
 
             bool doAsyncWrite();
 
-            bool processResponse(BlockQueue<Call> queue);
+            bool processResponse(shared_ptr<Connection>);
 
         protected:
         private:
             boost::thread _t_responder;
 
-            std::mutex _mutex;
-            std::condition_variable _cond;
+            std::mutex _mutex_resp;
+            std::condition_variable _cond_resp;
     };
 
 }
