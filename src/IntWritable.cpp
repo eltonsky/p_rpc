@@ -29,7 +29,7 @@ int IntWritable::readFields(tcp::socket * sock) {
     }
 
     //convert
-    _value = atoi(buf);
+    _value = *reinterpret_cast<const char*>(buf);
 
     return l;
 }
@@ -40,7 +40,21 @@ int IntWritable::write(tcp::socket * sock){
     if(sock == NULL)
         return -1;
 
-    size_t l = boost::asio::write(*sock, boost::asio::buffer((const char*)&_value, sizeof(_value)));
+    size_t length = sizeof(_value);
+
+    boost::asio::write(*sock, boost::asio::buffer((const char*)&length, sizeof(length)));
+
+    stringbuf sb;
+    sb.sputn((const char*)&_value, sizeof _value);
+
+    size_t l = boost::asio::write(*sock, boost::asio::buffer(sb.str().c_str(), length));
+
+    if(l != length) {
+        Log::write(ERROR,
+                   "IntWritable::write: expected length %d, write length %d\n",
+                   length, l);
+        return -1;
+    }
 
     return l;
 }
@@ -53,7 +67,7 @@ string IntWritable::printToString() {
 
 string IntWritable::toString() {
     stringbuf sb;
-    sb.sputn((const char*)&_value, sizeof _value);
+    sb.sputn((const char*)&_value, sizeof(_value));
     return sb.str();
 }
 

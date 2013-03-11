@@ -32,7 +32,7 @@ bool Test1::test1(string server_host, int port, int rep) {
 
         shared_ptr<Writable> val = client.call(w, "IntWritable",ep);
         Log::write(INFO, "In thread %ld : %d #### CLIENT RESULT : %s\n" ,
-                   (long int)syscall(SYS_gettid), i ,val->toString().c_str());
+                   (long int)syscall(SYS_gettid), i ,val->printToString().c_str());
     }
 
     return true;

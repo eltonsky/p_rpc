@@ -42,9 +42,11 @@ namespace Server{
 
             inline void setValue(shared_ptr<Writable> v) {
                 _strVal = v->toString();
+                _value = v;
             }
 
-            inline const string getValue() const {return _strVal;}
+            inline const string getValueStr() const {return _strVal;}
+            inline const shared_ptr<Writable> getValue() const {return _value;}
             inline const tcp::socket* getSock() const {return _connection->getSock().get();}
             inline void setConnection(shared_ptr<Connection> conn) {_connection = conn;}
             inline shared_ptr<Connection> getConnection() const {return _connection;}
@@ -61,7 +63,7 @@ namespace Server{
             string _class;
             string _method;
             vector<shared_ptr<Writable>> _params;
-            //shared_ptr<Writable> _value;
+            shared_ptr<Writable> _value;
             int _pos = 0; // the pos to start writing again, for a async mode
             string _strVal;
     };

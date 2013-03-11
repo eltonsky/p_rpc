@@ -67,7 +67,7 @@ class Client
             void setValue(shared_ptr<Writable> val) {
                 _value = val;
 
-                Log::write(DEBUG, "setValue : value is %s\n", val->toString().c_str());
+                Log::write(DEBUG, "setValue : value is %s\n", val->printToString().c_str());
 
                 _done = true;
                 _cond.notify_all();

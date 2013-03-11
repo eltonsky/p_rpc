@@ -24,14 +24,16 @@ namespace Server{
             tcp::socket* sock = _sock.get();
 
             size_t wrote = 0;
-            size_t length = call->getValue().length();
+            size_t length = call->getValueStr().length();
             size_t curr_pos = call->getPos();
+            size_t left = length - curr_pos;
 
             if(curr_pos == 0) {
                 int call_id = call->getId();
                 //assume call_id is always sent without prob.
                 boost::asio::write(*(sock), boost::asio::buffer((const char*)&call_id, sizeof(call_id)));
 
+                boost::asio::write(*(sock), boost::asio::buffer((const char*)&left, sizeof(left)));
             } else {
 
                 if( curr_pos < 0 || curr_pos > length) {
@@ -40,23 +42,23 @@ namespace Server{
                 }
             }
 
-            const char* start = call->getValue().c_str() + curr_pos;
+            const char* start = call->getValueStr().c_str() + curr_pos;
 
             Log::write(DEBUG,
                        "Connection::processResponse : call id %d, length %d, curr_pos %d, value %s\n",
-                       call->getId(), length, curr_pos, call->getValue().c_str());
+                       call->getId(), length, curr_pos, call->getValue()->printToString().c_str());
 
-            wrote = sock->write_some(boost::asio::buffer(start, (length - curr_pos)));
+            wrote = sock->write_some(boost::asio::buffer(start, left));
 
-            Log::write(DEBUG, "wrote is %d, start %s\n", wrote, start);
+            Log::write(DEBUG, "wrote is %d\n", wrote);
 
             // if didn't write all data, add the call back to respond_queue
             // and move on to next connection.
-            if(wrote < length - curr_pos) {
+            if(wrote < left) {
                 call->setPos(wrote+curr_pos);
 
                 if(!respond_queue.try_push(call)) {
-                    Log::write(ERROR ,"FATAL: can not insert call into respond_queue. is it full !?\n");
+                    Log::write(ERROR ,"FATAL: can not insert call into respond_queue. full !?\n");
                     return -1;
                 }
 

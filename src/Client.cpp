@@ -97,6 +97,7 @@ void Client::Connection::recvRespond(shared_ptr<Call> curr_call) {
         val->readFields(_sock);
 
         curr_call->setValue(val);
+
     }catch(exception& e){
         Log::write(ERROR, "Failed to read value for call %d and set value - %s\n",
                     curr_call->getId(), e.what());
