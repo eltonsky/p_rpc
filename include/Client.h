@@ -129,6 +129,7 @@ class Client
             tcp::socket* _sock;
             const int _max_conn_calls = 100;
             shared_ptr<tcp::endpoint> _ep;
+            bool _recv_started;
 
         public:
             std::mutex _mutex_conn;
@@ -139,6 +140,8 @@ class Client
 
             Connection(shared_ptr<tcp::endpoint>);
             ~Connection();
+
+            bool connect(shared_ptr<tcp::endpoint>, bool reuse = false);
 
             bool waitForWork(); // not used.
 
@@ -162,7 +165,7 @@ class Client
 
         int _last_connection_index = 0;
         const int _max_connection_num = 32768;
-        map<shared_ptr<tcp::endpoint>,shared_ptr<Connection>> _connections;
+        map<tcp::endpoint,shared_ptr<Connection>> _connections;
 
         shared_ptr<tcp::endpoint> _server_ep;
         const int _max_client_calls = 100;

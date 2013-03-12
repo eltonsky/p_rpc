@@ -30,7 +30,7 @@ bool Test1::test1(string server_host, int port, int rep) {
         MethodWritable* mw = new MethodWritable("FSNameSystem", "create", params);
         shared_ptr<Writable> w = shared_ptr<MethodWritable>(mw);
 
-        shared_ptr<Writable> val = client.call(w, "IntWritable",ep);
+        shared_ptr<Writable> val = client.call(w, "IntWritable", ep);
         Log::write(INFO, "In thread %ld : %d #### CLIENT RESULT : %s\n" ,
                    (long int)syscall(SYS_gettid), i ,val->printToString().c_str());
     }

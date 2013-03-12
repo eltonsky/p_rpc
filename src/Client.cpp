@@ -9,43 +9,45 @@ bool Client::_should_stop = false;
 
 Client::Connection::Connection(shared_ptr<tcp::endpoint> ep) :
                                 _ep(ep) ,
-                                bq_conn_calls(_max_conn_calls) {
-    bool connected = true;
+                                _recv_started(false),
+                                bq_conn_calls(_max_conn_calls) {}
 
+
+bool Client::Connection::connect(shared_ptr<tcp::endpoint> ep,
+                                 bool reuse) {
     try{
-        tcp::resolver resolver(_io_service);
-        tcp::resolver::query query(tcp::v4(),
-                                    ep->address().to_string(),
-                                    std::to_string(ep->port()));
-        tcp::resolver::iterator iterator = resolver.resolve(query);
-
         _sock = new tcp::socket(_io_service);
 
-        _sock->connect(*iterator);
+        _sock->connect(*(ep.get()));
 
         Log::write(INFO, "Client connected to %s : %d\n",
                    ep->address().to_string().c_str(),
                    ep->port());
 
     } catch(...) {
-
         Log::write(ERROR, "Failed to connect to %s : %d\n",
                    ep->address().to_string().c_str(),
                     ep->port());
 
-        connected = false;
+        return false;
     }
 
-    if(connected) {
+    if(!_recv_started) {
         try{
             // start recv thread
             _t_recv_respond =
                 boost::thread(boost::bind(&Client::Connection::recvStart,this));
 
+            _recv_started = true;
+
         }catch(exception& e){
             Log::write(ERROR, "Failed to start thread _t_recv_respond.\n");
+
+            return false;
         }
     }
+
+    return true;
 }
 
 
@@ -66,10 +68,14 @@ void Client::Connection::recvStart() {
 
         recvRespond(curr_call);
     }
+
+    Log::write(INFO, "Connection receiver thread exits.\n");
 }
 
 
 void Client::Connection::recvRespond(shared_ptr<Call> curr_call) {
+
+    Log::write(DEBUG, "receiving respond for call id %d\n", curr_call->getId());
 
     shared_ptr<Writable> val = Method::getNewInstance(curr_call->getValueClass());
 
@@ -169,16 +175,23 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
     shared_ptr<Client::Connection> conn;
 
     try{
-        map<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>::iterator iter =
-            _connections.find(ep);
+        map<tcp::endpoint,shared_ptr<Client::Connection>>::iterator iter =
+            _connections.find(*(ep.get()));
+
+        bool ifReuse = false;
 
         if(iter == _connections.end()) {
             conn = make_shared<Client::Connection>(ep);
 
-            _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>(ep,conn));
+            _connections.insert(pair<tcp::endpoint,shared_ptr<Client::Connection>>(*(ep.get()),conn));
         } else {
             conn = iter->second;
+
+            ifReuse = true;
         }
+
+        conn->connect(ep, ifReuse);
+
     }catch(exception& e){
         Log::write(ERROR, "Failed to retrieve/create connection : %s\n", e.what());
 
