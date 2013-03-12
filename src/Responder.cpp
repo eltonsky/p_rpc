@@ -29,8 +29,8 @@ namespace Server{
             //lock
             _mutex_conns.lock();
 
-            map<tcp::endpoint, shared_ptr<Connection>>::iterator iter =
-                    _connections.find(*(ep.get()));
+            map<shared_ptr<tcp::endpoint>, shared_ptr<Connection>>::iterator iter =
+                    _connections.find(ep);
 
             if (iter == _connections.end()) {
                 _mutex_conns.unlock();

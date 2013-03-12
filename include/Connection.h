@@ -50,7 +50,7 @@ namespace Server {
     };
 
     // delcare map after definition of connection map.
-    extern map<tcp::endpoint, shared_ptr<Connection>> _connections;
+    extern map<shared_ptr<tcp::endpoint>, shared_ptr<Connection>> _connections;
 
 }
 

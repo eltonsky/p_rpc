@@ -13,8 +13,7 @@ Client::Connection::Connection(shared_ptr<tcp::endpoint> ep) :
                                 bq_conn_calls(_max_conn_calls) {}
 
 
-bool Client::Connection::connect(shared_ptr<tcp::endpoint> ep,
-                                 bool reuse) {
+bool Client::Connection::connect(shared_ptr<tcp::endpoint> ep) {
     try{
         _sock = new tcp::socket(_io_service);
 
@@ -83,7 +82,7 @@ void Client::Connection::recvRespond(shared_ptr<Call> curr_call) {
 
     try{
 
-        size_t l = boost::asio::read(*_sock,
+        size_t l = boost::asio::read(*(_sock),
             boost::asio::buffer(&curr_call_id, sizeof(curr_call_id)));
 
         if(l<=0) {
@@ -164,6 +163,8 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
         call->wait(_call_wait_time);
     }
 
+    curr_conn->close();
+
     return call->getValue();
 }
 
@@ -175,22 +176,20 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
     shared_ptr<Client::Connection> conn;
 
     try{
-        map<tcp::endpoint,shared_ptr<Client::Connection>>::iterator iter =
-            _connections.find(*(ep.get()));
-
-        bool ifReuse = false;
+        map<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>::iterator iter =
+            _connections.find(ep);
 
         if(iter == _connections.end()) {
             conn = make_shared<Client::Connection>(ep);
 
-            _connections.insert(pair<tcp::endpoint,shared_ptr<Client::Connection>>(*(ep.get()),conn));
+            _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>(ep,conn));
         } else {
             conn = iter->second;
 
-            ifReuse = true;
+            Log::write(DEBUG, "Reuse connection obj\n");
         }
 
-        conn->connect(ep, ifReuse);
+        conn->connect(ep);
 
     }catch(exception& e){
         Log::write(ERROR, "Failed to retrieve/create connection : %s\n", e.what());

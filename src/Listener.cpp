@@ -76,13 +76,13 @@ namespace Server {
 
                 _mutex_conns.lock();
 
-                map<tcp::endpoint, shared_ptr<Connection>>::iterator iter =
-                    _connections.find(*(ep.get()));
+                map<shared_ptr<tcp::endpoint>, shared_ptr<Connection>>::iterator iter =
+                    _connections.find(ep);
 
                 if (iter == _connections.end()) {
                     conn = make_shared<Connection>(sock, ep, _last_connection_index++);
 
-                    _connections.insert(pair<tcp::endpoint,shared_ptr<Connection>>(*(ep.get()), conn));
+                    _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Connection>>(ep, conn));
 
                 } else {
                     conn = iter->second;

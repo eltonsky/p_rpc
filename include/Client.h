@@ -141,13 +141,23 @@ class Client
             Connection(shared_ptr<tcp::endpoint>);
             ~Connection();
 
-            bool connect(shared_ptr<tcp::endpoint>, bool reuse = false);
+            bool connect(shared_ptr<tcp::endpoint>);
 
             bool waitForWork(); // not used.
 
             void recvRespond(shared_ptr<Call>);
 
             void recvStart();
+
+            inline void close() {
+                if(_sock != NULL) {
+                    boost::system::error_code ec;
+
+                    _sock->close(ec);
+
+                    Log::write(DEBUG, "close _sock status : %s\n", ec.message().c_str());
+                }
+            }
 
             inline string toString() {
                 stringstream ss;
@@ -165,7 +175,7 @@ class Client
 
         int _last_connection_index = 0;
         const int _max_connection_num = 32768;
-        map<tcp::endpoint,shared_ptr<Connection>> _connections;
+        map<shared_ptr<tcp::endpoint>,shared_ptr<Connection>> _connections;
 
         shared_ptr<tcp::endpoint> _server_ep;
         const int _max_client_calls = 100;
