@@ -12,6 +12,7 @@ namespace Server {
         _handler_id = id;
     }
 
+
     void Handler::start() {
         _t_handler = boost::thread(boost::bind(&Server::Handler::handle, this));
     }

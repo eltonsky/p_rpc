@@ -16,10 +16,7 @@ Client::Connection::Connection(shared_ptr<tcp::endpoint> ep) :
 bool Client::Connection::connect(shared_ptr<tcp::endpoint> ep,
                                  shared_ptr<Call> call) {
     try{
-        _sock = new tcp::socket(call->getIoService());
-
-//        boost::asio::socket_base::linger option(true,0);
-//        _sock->set_option(option);
+        _sock = new tcp::socket(_io_service);
 
         _sock->connect(*(ep.get()));
 
@@ -55,8 +52,6 @@ bool Client::Connection::connect(shared_ptr<tcp::endpoint> ep,
 
 
 Client::Connection::~Connection() {
-    if(_sock != NULL)
-        delete _sock;
 }
 
 

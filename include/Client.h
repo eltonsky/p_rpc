@@ -159,6 +159,8 @@ class Client
 
                     _sock->close(ec);
 
+                    delete _sock;
+
                     Log::write(DEBUG, "close _sock status : %s\n", ec.message().c_str());
                 }
             }

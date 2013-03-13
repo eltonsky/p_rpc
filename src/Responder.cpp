@@ -66,9 +66,17 @@ namespace Server{
             return false;
         }
 
-        if(call->getConnection()->respond_queue.size() == 1) {
-            processResponse(call->getConnection());
-        } else {
+        Log::write(DEBUG, "@connection %d respond_queue size is %d\n",
+                   call->getConnection()->index,
+                   call->getConnection()->respond_queue.size());
+
+        // the mighty optimization to to skip _bq_respond and respond thread;
+        // cause someconfusions! bear in mind with this!
+        // need a configure to start or stop this one.
+/// Comment this out for testing _bq_respond.
+//        if(call->getConnection()->respond_queue.size() == 1) {
+//            processResponse(call->getConnection());
+//        } else {
             // queue for connection index : which connection has a result
             // ready to be sent.
             if(!_bq_respond.try_push(call->getConnection()->getEndpoint())) {
@@ -78,7 +86,7 @@ namespace Server{
             }
 
             Log::write(INFO, "_bq_respond.size() %d\n", _bq_respond.size());
-        }
+//        }
 
         return true;
     }
@@ -95,6 +103,10 @@ namespace Server{
                        conn->index);
             return false;
         }
+
+/// queue test for _bq_respond. For this purpose, the optimization above
+/// can not be used.
+//this_thread::sleep_for(chrono::milliseconds(50));
 
         //write some, for max throughput
         int res = conn->processResponse(call);

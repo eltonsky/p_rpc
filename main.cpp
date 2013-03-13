@@ -90,9 +90,7 @@ int main(int argc, char** argv)
             Log::init(client_log_conf);
 
             Test1 t1;
-            t1.test2(server_host, port, 8, 1000);
-
-            //t1.test2(server_host, port);
+            t1.test2(server_host, port, 2, 1000);
 
         } else {
 

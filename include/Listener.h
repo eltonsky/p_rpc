@@ -130,7 +130,11 @@ class Listener
             }
 
             bool add(shared_ptr<Connection> conn) {
-                return _bq_conn.try_push(conn);
+                bool res = _bq_conn.try_push(conn);
+
+                Log::write(DEBUG, "_bq_conn 's size is %d\n", _bq_conn.size());
+
+                return res;
             }
 
             void waitToFinish() {
