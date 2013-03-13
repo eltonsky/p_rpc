@@ -13,9 +13,13 @@ Client::Connection::Connection(shared_ptr<tcp::endpoint> ep) :
                                 bq_conn_calls(_max_conn_calls) {}
 
 
-bool Client::Connection::connect(shared_ptr<tcp::endpoint> ep) {
+bool Client::Connection::connect(shared_ptr<tcp::endpoint> ep,
+                                 shared_ptr<Call> call) {
     try{
-        _sock = new tcp::socket(_io_service);
+        _sock = new tcp::socket(call->getIoService());
+
+//        boost::asio::socket_base::linger option(true,0);
+//        _sock->set_option(option);
 
         _sock->connect(*(ep.get()));
 
@@ -163,6 +167,8 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
         call->wait(_call_wait_time);
     }
 
+    // close the underline socket in this conn.
+    // a new socket will be created for a new conn.
     curr_conn->close();
 
     return call->getValue();
@@ -189,7 +195,7 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
             Log::write(DEBUG, "Reuse connection obj\n");
         }
 
-        conn->connect(ep);
+        conn->connect(ep,call);
 
     }catch(exception& e){
         Log::write(ERROR, "Failed to retrieve/create connection : %s\n", e.what());

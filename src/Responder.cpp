@@ -45,11 +45,10 @@ namespace Server{
 
             _mutex_conns.unlock();
 
-            //print
             Log::write(DEBUG, "connection in responder is <%s:%d>\n",
                     ep->address().to_string().c_str(), ep->port());
 
-            if(processResponse(conn)) {
+            if(!processResponse(conn)) {
                 Log::write(ERROR, "Failed to process a response from conn <%s:%d>\n",
                            ep->address().to_string().c_str(), ep->port());
                 std::abort();
@@ -97,13 +96,20 @@ namespace Server{
             return false;
         }
 
-
-cout<<"Before call->getConnection()->processResponse();"<<endl;
-
         //write some, for max throughput
         int res = conn->processResponse(call);
 
-cout<<"After call->getConnection()->processResponse();"<<endl;
+        // close & remove conn after processing a call.
+        // coz a call is associated with a connection anyway, and a connection
+        // is useless afterwareds.
+        conn->close();
+
+        //remove from _connections
+        _mutex_conns.lock();
+
+        _connections.erase(conn->getEndpoint());
+
+        _mutex_conns.unlock();
 
         if(res < 0) {
             Log::write(ERROR, "Failed to process a call response <Connection:%d>, <call:%d>\n",

@@ -7,8 +7,8 @@ namespace Server {
 
     Listener::Listener(int port) :
         _bq_acpt_sock(max_accept_conns),
-        _acceptor(_io_service_listener,
-            tcp::endpoint(tcp::v4(), port))  {
+        _acceptor(_io_service_listener,tcp::endpoint(tcp::v4(), port))  {
+
         _port = port;
 
         for(int i=0; i<num_readers; i++) {
@@ -16,6 +16,9 @@ namespace Server {
         }
 
         _last_reader_index= -1;
+
+        _acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+        _acceptor.set_option(boost::asio::ip::tcp::acceptor::linger(false,1));
     }
 
 
@@ -84,8 +87,12 @@ namespace Server {
 
                     _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Connection>>(ep, conn));
 
+                    Log::write(DEBUG, "Create a new connecton.\n");
+
                 } else {
                     conn = iter->second;
+
+                    Log::write(DEBUG, "Reuse an existing connecton.\n");
                 }
 
                 _mutex_conns.unlock();

@@ -34,7 +34,6 @@ class Client
                  _done(false) {}
 
 
-
             Call(shared_ptr<Writable> p, string value_class)
                 : _valueClass(value_class), _param(p),
                  _done(false){}
@@ -108,6 +107,10 @@ class Client
                 _connection = conn;
             }
 
+            inline boost::asio::io_service& getIoService() {
+                return _io_service;
+            }
+
         private:
 
             string _valueClass;
@@ -141,7 +144,8 @@ class Client
             Connection(shared_ptr<tcp::endpoint>);
             ~Connection();
 
-            bool connect(shared_ptr<tcp::endpoint>);
+            bool connect(shared_ptr<tcp::endpoint>,
+                         shared_ptr<Call>);
 
             bool waitForWork(); // not used.
 

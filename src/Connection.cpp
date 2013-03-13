@@ -50,7 +50,7 @@ namespace Server{
 
             wrote = sock->write_some(boost::asio::buffer(start, left));
 
-            Log::write(DEBUG, "wrote is %d\n", wrote);
+            Log::write(DEBUG, "wrote is %d, left is %d\n", wrote, left);
 
             // if didn't write all data, add the call back to respond_queue
             // and move on to next connection.
@@ -74,6 +74,15 @@ namespace Server{
     }
 
 
-    void Connection::close() {}
+    void Connection::close() {
+        Log::write(DEBUG, "current _sock ref count %d\n", _sock.use_count());
+
+        if(_sock.get() != NULL)
+            _sock->close();
+    }
 
 }
+
+
+
+
