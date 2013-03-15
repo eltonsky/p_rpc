@@ -8,6 +8,7 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/scoped_array.hpp>
 #include "Log.h"
 
 using boost::asio::ip::tcp;

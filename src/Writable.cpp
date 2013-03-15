@@ -50,15 +50,21 @@ string Writable::readString(tcp::socket * sock){
     Log::write(DEBUG, "readString : length of length %d\n", l);
 
     if(length > 0) {
-        char char_str[length];
+
+        boost::scoped_array<char> char_str(new char[length+1]);
 
         size_t reply_length = boost::asio::read(*sock,
-            boost::asio::buffer(char_str, length));
+            boost::asio::buffer(char_str.get(), length));
 
-        Log::write(DEBUG, "readString : %s, length %d\n", char_str, reply_length);
-
+        // reply_length must be <= length
         if(reply_length > 0) {
-            return string(char_str);
+            char_str[reply_length] = '\0';
+
+            Log::write(DEBUG, "readString : %s, length %d\n", char_str.get(), reply_length);
+
+            string str(char_str.get());
+
+            return str;
         }
     }
 
