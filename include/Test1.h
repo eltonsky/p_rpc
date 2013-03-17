@@ -21,6 +21,8 @@
 #include "Client.h"
 #include "Log.h"
 #include "MethodWritable.h"
+#include "RPC.h"
+#include "Invocation.h"
 
 class Test1
 {
@@ -30,6 +32,8 @@ class Test1
 
         bool test1(std::string, int, int rep = 1);
         bool test2(std::string, int, int thread = 1, int rep =1);
+        bool test10(string server_host, int port, int rep=1);
+        bool test20(std::string, int, int thread = 1, int rep =1);
 
     protected:
     private:

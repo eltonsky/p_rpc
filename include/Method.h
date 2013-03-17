@@ -4,7 +4,9 @@
 #include "Writable.h"
 #include "IntWritable.h"
 #include "MethodWritable.h"
+#include "Test2.h"
 #include <thread>
+
 
 using namespace std;
 

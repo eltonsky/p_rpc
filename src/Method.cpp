@@ -20,6 +20,17 @@ shared_ptr<Writable> Method::call(string c, string m, vector<shared_ptr<Writable
 
             return shared_ptr<IntWritable>(iw);
         }
+    } else if(c == "NameNode") {
+        if(m == "create") {
+            /// For test ...
+            Test2::NameNode nn;
+            shared_ptr<IntWritable> a1 = make_shared<IntWritable>(11);
+            shared_ptr<IntWritable> a2 = make_shared<IntWritable>(22);
+            shared_ptr<IntWritable> a3 = make_shared<IntWritable>(33);
+            shared_ptr<IntWritable> a4 = make_shared<IntWritable>(44);
+
+            return nn.create(a1,a2,a3,a4);
+        }
     }
 
     return NULL;
@@ -29,8 +40,6 @@ shared_ptr<Writable> Method::call(string c, string m, vector<shared_ptr<Writable
 shared_ptr<Writable> Method::getNewInstance(string class_) {
     if(class_ == "IntWritable") {
         return shared_ptr<Writable>(new IntWritable());
-    } else if(class_ == "FileSystem") {
-
     } else if(class_ == "MethodWritable"){
         return shared_ptr<Writable>(new MethodWritable());
 

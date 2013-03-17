@@ -183,7 +183,7 @@ class Client
         const int _max_connection_num = 32768;
         map<shared_ptr<tcp::endpoint>,shared_ptr<Connection>> _connections;
 
-        shared_ptr<tcp::endpoint> _server_ep;
+        shared_ptr<tcp::endpoint> _client_ep;
         const int _max_client_calls = 100;
 
         static const long _call_wait_time;
@@ -194,7 +194,6 @@ class Client
 
     public:
 
-        Client(shared_ptr<tcp::endpoint> ep);
         Client();
 
         void sendCall(Call* call);

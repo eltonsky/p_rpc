@@ -1,13 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
+	<File name="include/Call.h" open="0" top="0" tabpos="0">
+		<Cursor position="70" topLine="0" />
+	</File>
+	<File name="include/Client.h" open="0" top="0" tabpos="7">
+		<Cursor position="5378" topLine="162" />
+	</File>
+	<File name="include/Invocation.h" open="1" top="0" tabpos="5">
+		<Cursor position="365" topLine="0" />
+	</File>
+	<File name="include/Method.h" open="1" top="0" tabpos="13">
+		<Cursor position="127" topLine="0" />
+	</File>
+	<File name="include/RPC.h" open="1" top="0" tabpos="7">
+		<Cursor position="2260" topLine="34" />
+	</File>
+	<File name="include/Responder.h" open="1" top="0" tabpos="15">
+		<Cursor position="535" topLine="0" />
+	</File>
+	<File name="include/Test1.h" open="0" top="0" tabpos="12">
+		<Cursor position="33" topLine="0" />
+	</File>
+	<File name="include/Test2.h" open="1" top="0" tabpos="11">
+		<Cursor position="608" topLine="13" />
+	</File>
+	<File name="include/Writable.h" open="1" top="0" tabpos="4">
+		<Cursor position="221" topLine="0" />
+	</File>
 	<File name="main.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="93" topLine="0" />
+		<Cursor position="2174" topLine="74" />
+	</File>
+	<File name="src/Client.cpp" open="1" top="0" tabpos="9">
+		<Cursor position="3794" topLine="129" />
 	</File>
 	<File name="src/IntWritable.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="327" topLine="0" />
+		<Cursor position="360" topLine="32" />
+	</File>
+	<File name="src/Invocation.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="53" topLine="0" />
+	</File>
+	<File name="src/Listener.cpp" open="0" top="0" tabpos="10">
+		<Cursor position="2743" topLine="54" />
+	</File>
+	<File name="src/Method.cpp" open="1" top="1" tabpos="14">
+		<Cursor position="993" topLine="0" />
+	</File>
+	<File name="src/MethodWritable.cpp" open="0" top="0" tabpos="9">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="src/RPC.cpp" open="1" top="0" tabpos="8">
+		<Cursor position="18" topLine="0" />
+	</File>
+	<File name="src/Test1.cpp" open="1" top="0" tabpos="10">
+		<Cursor position="236" topLine="36" />
+	</File>
+	<File name="src/Test2.cpp" open="1" top="0" tabpos="12">
+		<Cursor position="190" topLine="0" />
 	</File>
 	<File name="src/Writable.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="1136" topLine="24" />
+		<Cursor position="1680" topLine="26" />
 	</File>
 </CodeBlocks_layout_file>

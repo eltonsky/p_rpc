@@ -72,7 +72,7 @@ string Writable::readString(tcp::socket * sock){
 }
 
 
-string Writable::getClass() { return "Writable";}
+string Writable::getClass() { return "Writable"; }
 
 
 

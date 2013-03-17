@@ -130,8 +130,7 @@ bool Client::Connection::waitForWork() {
 
 /// Client
 
-Client::Client(shared_ptr<tcp::endpoint> ep)
-    : _server_ep(ep){}
+Client::Client(){}
 
 
 void Client::stop() {
@@ -148,8 +147,8 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
 
     if((curr_conn = getConnection(ep, call)) == NULL) {
         Log::write(ERROR, "Can not connect to endpoint  %s : %d \n",
-                   _server_ep->address().to_string().c_str(),
-                   _server_ep->port());
+                   ep->address().to_string().c_str(),
+                   ep->port());
         return NULL;
     }
 

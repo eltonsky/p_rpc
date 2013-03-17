@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1363318388 source:/home/eltonsky/cpp/p_rpc/main.cpp
+1363515065 source:/home/eltonsky/cpp/p_rpc/main.cpp
 	<cstdlib>
 	<iostream>
 	<sstream>
@@ -27,7 +27,7 @@
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/Call.cpp
 	"Call.h"
 
-1363170351 source:/home/eltonsky/cpp/p_rpc/src/Client.cpp
+1363420863 source:/home/eltonsky/cpp/p_rpc/src/Client.cpp
 	"Client.h"
 
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/Connection.cpp
@@ -43,7 +43,7 @@
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/Log.cpp
 	"Log.h"
 
-1363004619 source:/home/eltonsky/cpp/p_rpc/src/Method.cpp
+1363517997 source:/home/eltonsky/cpp/p_rpc/src/Method.cpp
 	"Method.h"
 
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/MethodWritable.cpp
@@ -55,16 +55,25 @@
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/Server.cpp
 	"Server.h"
 
-1363170351 source:/home/eltonsky/cpp/p_rpc/src/Test1.cpp
+1363506754 source:/home/eltonsky/cpp/p_rpc/src/Test1.cpp
 	"Test1.h"
 
 1363004619 source:/home/eltonsky/cpp/p_rpc/src/Utils.cpp
 	"Utils.h"
 	"unistd.h"
 
-1363317933 source:/home/eltonsky/cpp/p_rpc/src/Writable.cpp
+1363330875 source:/home/eltonsky/cpp/p_rpc/src/Writable.cpp
 	"Writable.h"
 
-1363318357 source:/home/eltonsky/cpp/p_rpc/src/IntWritable.cpp
+1363319334 source:/home/eltonsky/cpp/p_rpc/src/IntWritable.cpp
 	"IntWritable.h"
+
+1363507047 source:/home/eltonsky/cpp/p_rpc/src/Invocation.cpp
+	"Invocation.h"
+
+1363514769 source:/home/eltonsky/cpp/p_rpc/src/RPC.cpp
+	"RPC.h"
+
+1363517496 source:/home/eltonsky/cpp/p_rpc/src/Test2.cpp
+	"Test2.h"
 

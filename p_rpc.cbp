@@ -14,11 +14,13 @@
 				<Compiler>
 					<Add option="-pedantic" />
 					<Add option="-Wall" />
+					<Add option="-pg" />
 					<Add option="-g" />
 					<Add option="-std=c++11" />
 					<Add option="-I include" />
 				</Compiler>
 				<Linker>
+					<Add option="-pg" />
 					<Add option="-lpthread" />
 					<Add option="-llog4cpp" />
 					<Add option="-lboost_system" />
@@ -48,13 +50,16 @@
 		<Unit filename="include/Connection.h" />
 		<Unit filename="include/Handler.h" />
 		<Unit filename="include/IntWritable.h" />
+		<Unit filename="include/Invocation.h" />
 		<Unit filename="include/Listener.h" />
 		<Unit filename="include/Log.h" />
 		<Unit filename="include/Method.h" />
 		<Unit filename="include/MethodWritable.h" />
+		<Unit filename="include/RPC.h" />
 		<Unit filename="include/Responder.h" />
 		<Unit filename="include/Server.h" />
 		<Unit filename="include/Test1.h" />
+		<Unit filename="include/Test2.h" />
 		<Unit filename="include/Utils.h" />
 		<Unit filename="include/Writable.h" />
 		<Unit filename="main.cpp" />
@@ -64,13 +69,16 @@
 		<Unit filename="src/Connection.cpp" />
 		<Unit filename="src/Handler.cpp" />
 		<Unit filename="src/IntWritable.cpp" />
+		<Unit filename="src/Invocation.cpp" />
 		<Unit filename="src/Listener.cpp" />
 		<Unit filename="src/Log.cpp" />
 		<Unit filename="src/Method.cpp" />
 		<Unit filename="src/MethodWritable.cpp" />
+		<Unit filename="src/RPC.cpp" />
 		<Unit filename="src/Responder.cpp" />
 		<Unit filename="src/Server.cpp" />
 		<Unit filename="src/Test1.cpp" />
+		<Unit filename="src/Test2.cpp" />
 		<Unit filename="src/Utils.cpp" />
 		<Unit filename="src/Writable.cpp" />
 		<Extensions>

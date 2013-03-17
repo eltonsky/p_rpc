@@ -89,8 +89,12 @@ int main(int argc, char** argv)
             // init log
             Log::init(client_log_conf);
 
-            Test1 t1;
-            t1.test2(server_host, port, 4, 100);
+//            Test1 t1;
+//            //t1.test2(server_host, port, 4, 1000);
+//            t1.test20(server_host, port, 4, 1000);
+
+            Test2 t2;
+            t2.test21(server_host, port);
 
         } else {
 
