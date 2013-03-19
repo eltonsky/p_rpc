@@ -18,6 +18,7 @@
 #include "Log.h"
 #include "MethodWritable.h"
 #include "Test1.h"
+#include "Test2.h"
 
 using boost::asio::ip::tcp;
 using namespace std;
@@ -94,7 +95,7 @@ int main(int argc, char** argv)
 //            t1.test20(server_host, port, 4, 1000);
 
             Test2 t2;
-            t2.test21(server_host, port);
+            t2.test20(server_host, port, 4, 1000);
 
         } else {
 

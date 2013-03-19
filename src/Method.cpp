@@ -1,4 +1,5 @@
 #include "Method.h"
+#include "NameNode.h"
 
 Method::Method()
 {
@@ -12,24 +13,17 @@ shared_ptr<Writable> Method::call(string c, string m, vector<shared_ptr<Writable
 
     if(c == "FSNameSystem") {
         if(m == "create") {
-            IntWritable* iw = new IntWritable(21);
-            //call->setValue(shared_ptr<IntWritable>(iw));
-
-/***simulate real call**/
-//std::this_thread::sleep_for(chrono::milliseconds(200));
-
-            return shared_ptr<IntWritable>(iw);
+            return make_shared<IntWritable>(32);
         }
     } else if(c == "NameNode") {
         if(m == "create") {
             /// For test ...
-            Test2::NameNode nn;
-            shared_ptr<IntWritable> a1 = make_shared<IntWritable>(11);
-            shared_ptr<IntWritable> a2 = make_shared<IntWritable>(22);
-            shared_ptr<IntWritable> a3 = make_shared<IntWritable>(33);
-            shared_ptr<IntWritable> a4 = make_shared<IntWritable>(44);
+            NameNode nn;
 
-            return nn.create(a1,a2,a3,a4);
+            return nn.create(dynamic_pointer_cast<IntWritable>(params[0]),
+                             dynamic_pointer_cast<IntWritable>(params[1]),
+                             dynamic_pointer_cast<IntWritable>(params[2]),
+                             dynamic_pointer_cast<IntWritable>(params[3]));
         }
     }
 

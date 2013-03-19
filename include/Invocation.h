@@ -60,9 +60,6 @@ class Invocation
 
                 val = client->call(mw, valueClass, ep);
 
-                Log::write(INFO, "In thread %ld #### CLIENT RESULT : %s\n" ,
-                               (long int)syscall(SYS_gettid) ,val->printToString().c_str());
-
             }catch(exception& e) {
                 Log::write(ERROR, "Invocation::invoke : Failed to make call from client\n");
                 std::abort();

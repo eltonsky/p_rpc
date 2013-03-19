@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1363515065 source:/home/eltonsky/cpp/p_rpc/main.cpp
+1363694718 source:/home/eltonsky/cpp/p_rpc/main.cpp
 	<cstdlib>
 	<iostream>
 	<sstream>
@@ -20,6 +20,7 @@
 	"Log.h"
 	"MethodWritable.h"
 	"Test1.h"
+	"Test2.h"
 
 1363004619 source:/home/eltonsky/cpp/p_rpc/src/BlockQueue.cpp
 	"BlockQueue.h"
@@ -43,8 +44,9 @@
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/Log.cpp
 	"Log.h"
 
-1363517997 source:/home/eltonsky/cpp/p_rpc/src/Method.cpp
+1363692136 source:/home/eltonsky/cpp/p_rpc/src/Method.cpp
 	"Method.h"
+	"NameNode.h"
 
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/MethodWritable.cpp
 	"MethodWritable.h"
@@ -71,9 +73,15 @@
 1363507047 source:/home/eltonsky/cpp/p_rpc/src/Invocation.cpp
 	"Invocation.h"
 
-1363514769 source:/home/eltonsky/cpp/p_rpc/src/RPC.cpp
+1363693309 source:/home/eltonsky/cpp/p_rpc/src/RPC.cpp
 	"RPC.h"
 
-1363517496 source:/home/eltonsky/cpp/p_rpc/src/Test2.cpp
+1363695123 source:/home/eltonsky/cpp/p_rpc/src/Test2.cpp
 	"Test2.h"
+
+1363689864 source:/home/eltonsky/cpp/p_rpc/src/DataNodeProtocol.cpp
+	"DataNodeProtocol.h"
+
+1363689990 source:/home/eltonsky/cpp/p_rpc/src/NameNode.cpp
+	"NameNode.h"
 
