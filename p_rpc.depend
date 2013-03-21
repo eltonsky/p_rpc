@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1363694718 source:/home/eltonsky/cpp/p_rpc/main.cpp
+1363778760 source:/home/eltonsky/cpp/p_rpc/main.cpp
 	<cstdlib>
 	<iostream>
 	<sstream>
@@ -28,7 +28,7 @@
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/Call.cpp
 	"Call.h"
 
-1363420863 source:/home/eltonsky/cpp/p_rpc/src/Client.cpp
+1363779453 source:/home/eltonsky/cpp/p_rpc/src/Client.cpp
 	"Client.h"
 
 1363170351 source:/home/eltonsky/cpp/p_rpc/src/Connection.cpp
@@ -76,7 +76,7 @@
 1363693309 source:/home/eltonsky/cpp/p_rpc/src/RPC.cpp
 	"RPC.h"
 
-1363695123 source:/home/eltonsky/cpp/p_rpc/src/Test2.cpp
+1363779521 source:/home/eltonsky/cpp/p_rpc/src/Test2.cpp
 	"Test2.h"
 
 1363689864 source:/home/eltonsky/cpp/p_rpc/src/DataNodeProtocol.cpp

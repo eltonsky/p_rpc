@@ -48,6 +48,7 @@
 		<Unit filename="include/Call.h" />
 		<Unit filename="include/Client.h" />
 		<Unit filename="include/Connection.h" />
+		<Unit filename="include/DataNodeProtocol.h" />
 		<Unit filename="include/Handler.h" />
 		<Unit filename="include/IntWritable.h" />
 		<Unit filename="include/Invocation.h" />
@@ -55,6 +56,7 @@
 		<Unit filename="include/Log.h" />
 		<Unit filename="include/Method.h" />
 		<Unit filename="include/MethodWritable.h" />
+		<Unit filename="include/NameNode.h" />
 		<Unit filename="include/RPC.h" />
 		<Unit filename="include/Responder.h" />
 		<Unit filename="include/Server.h" />
@@ -67,6 +69,7 @@
 		<Unit filename="src/Call.cpp" />
 		<Unit filename="src/Client.cpp" />
 		<Unit filename="src/Connection.cpp" />
+		<Unit filename="src/DataNodeProtocol.cpp" />
 		<Unit filename="src/Handler.cpp" />
 		<Unit filename="src/IntWritable.cpp" />
 		<Unit filename="src/Invocation.cpp" />
@@ -74,6 +77,7 @@
 		<Unit filename="src/Log.cpp" />
 		<Unit filename="src/Method.cpp" />
 		<Unit filename="src/MethodWritable.cpp" />
+		<Unit filename="src/NameNode.cpp" />
 		<Unit filename="src/RPC.cpp" />
 		<Unit filename="src/Responder.cpp" />
 		<Unit filename="src/Server.cpp" />

@@ -13,11 +13,9 @@ Test2::~Test2()
 
 void Test2::test21(string server_host, int port, int rep) {
 
-
+    DataNodeProtocol namenode(server_host, port);
 
     for(int i = 0 ; i < rep; i++) {
-        DataNodeProtocol namenode(server_host, port);
-
         shared_ptr<IntWritable> a1 = make_shared<IntWritable>(12);
         shared_ptr<IntWritable> a2 = make_shared<IntWritable>(23);
         shared_ptr<IntWritable> a3 = make_shared<IntWritable>(34);

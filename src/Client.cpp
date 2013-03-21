@@ -197,7 +197,6 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
         return NULL;
     }
 
-    //TBD: if move following to a connetion function
     if(!conn->bq_conn_calls.try_push(call)) {
         Log::write(ERROR, "FATAL: can not insert call into bq_conn_calls. is it full !?");
         return NULL;
