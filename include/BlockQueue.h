@@ -1,7 +1,7 @@
 #ifndef BlockQueue_H
 #define BlockQueue_H
 
-#include <queue>
+#include <deque>
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
@@ -19,7 +19,8 @@ template <typename T> class BlockQueue
     const int prod_wait_time = 100;
     const int cons_wait_time = 100;
 
-    std::queue<T> queue_;
+    // use a dequeue for insert at both ends
+    std::deque<T> queue_;
     std::mutex mutex_;
     std::condition_variable cond_is_empty;
     std::condition_variable cond_is_full;
@@ -42,7 +43,7 @@ public:
         return queue_.size();
     }
 
-    const bool try_push(T const &val)
+    const bool try_push(T const &val, bool back = true)
     {
         unilock l(mutex_);
 
@@ -52,7 +53,12 @@ public:
                 [this] { return queue_.size() != max_size; })) {
 
             bool wake = queue_.empty(); // we may need to wake consumer
-            queue_.push(val);
+
+            if(back)
+                queue_.push_back(val);
+            else
+                queue_.push_front(val);
+
             if (wake) cond_is_empty.notify_one();
 
             Log::write(DEBUG, "pushed value, queue size %d\n", queue_.size());
@@ -70,6 +76,12 @@ public:
     }
 
 
+    void push_front(T const &val) {
+        while(!try_push(val, false))
+            this_thread::sleep_for(chrono::milliseconds(prod_wait_time));
+    }
+
+
     const bool _pop(T& result)
     {
         unilock l(mutex_);
@@ -80,7 +92,7 @@ public:
                 [this] { return queue_.size() > 0; })) {
 
             result = queue_.front();
-            queue_.pop();
+            queue_.pop_front();
 
             if(queue_.size() == max_size - 1)
                 cond_is_full.notify_one();

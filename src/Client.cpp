@@ -59,44 +59,46 @@ void Client::Connection::recvStart() {
     Log::write(INFO, "Connection receiver thread started. <thread id : %ld>, <pid : %d> \n",
                (long int)syscall(SYS_gettid), getpid());
 
-    while(!_should_stop) {
-        shared_ptr<Call> curr_call = bq_conn_calls.pop();
+    while(waitForWork()) {
 
-        Log::write(DEBUG, "Got call in Connection\n");
+        Log::write(DEBUG, "Got calls in Connection\n");
 
-        recvRespond(curr_call);
+        recvRespond();
     }
 
     Log::write(INFO, "Connection receiver thread exits.\n");
 }
 
 
-void Client::Connection::recvRespond(shared_ptr<Call> curr_call) {
+// bear in mind there's only one thread here playing with _calls
+// from this function, so no lock is need here. great!
+void Client::Connection::recvRespond() {
 
-    Log::write(DEBUG, "receiving respond for call id %d\n", curr_call->getId());
-
-    shared_ptr<Writable> val = Method::getNewInstance(curr_call->getValueClass());
-
-    int curr_call_id = -1;
+    int recv_call_id = -1;
 
     try{
 
         size_t l = boost::asio::read(*(_sock),
-            boost::asio::buffer(&curr_call_id, sizeof(curr_call_id)));
+            boost::asio::buffer(&recv_call_id, sizeof(recv_call_id)));
 
         if(l<=0) {
             Log::write(ERROR, "Failed to read call_id from connection <%s>\n",
                         this->toString().c_str());
             std::abort();
-        }else if(curr_call_id != curr_call->getId()) {
-            Log::write(ERROR,
-                       "Unmatched call id. curr call id is %d, received call id is %d.\n",
-                        curr_call->getId(), curr_call_id);
+        }
+
+        Log::write(DEBUG, "recv_call_id is %d\n",recv_call_id);
+
+        map<int,shared_ptr<Call>>::iterator iter= _calls.find(recv_call_id);
+
+        if(iter == _calls.end()) {
+            Log::write(ERROR, "Can not find received call id %d\n", recv_call_id);
             std::abort();
         }
 
-        Log::write(DEBUG, "curr_call_id is %d, curr_call's id is %d\n",
-                    curr_call_id, curr_call->getId());
+        shared_ptr<Call> curr_call = iter->second;
+
+        shared_ptr<Writable> val = Method::getNewInstance(curr_call->getValueClass());
 
         val->readFields(_sock);
 
@@ -109,23 +111,46 @@ void Client::Connection::recvRespond(shared_ptr<Call> curr_call) {
 }
 
 
-//not used.
+// this only returns when either:
+// 1. should stop OR
+// 2. get a call
+// return - true : if get a call
+//        - false: if should stop.
 bool Client::Connection::waitForWork() {
-    std::unique_lock<std::mutex> ulock(_mutex_conn);
-
-    while(true){
+    while(1) {
+        std::unique_lock<std::mutex> ulock(_mutex_conn);
 
         if(_cond_conn.wait_for(ulock, chrono::milliseconds(_call_wait_time),
-            [this] { return bq_conn_calls.size() > 0; })) {
+            [this] { return _calls.size() > 0; })) {
 
-            if(_should_stop)
-                return false;
-            else
-                return true;
+            return true;
+
         } else if(_should_stop)
             return false;
     }
+
+    return false;
 }
+
+
+bool Client::Connection::addCall(shared_ptr<Call> call) {
+    std::unique_lock<std::mutex> ulock(_mutex_conn);
+
+    try{
+        _calls.insert(pair<int,shared_ptr<Call>(call->getId(),call));
+
+        _cond_conn.notify();
+
+        Log::write(DEBUG, "insert a call to connection, _call.size() %d\n", call->size());
+
+    } catch(...) {
+        Log::write(ERROR, "Failed to insert %s to _calls\n", call->toString());
+        return false;
+    }
+
+    return true;
+}
+
 
 
 /// Client
@@ -143,6 +168,8 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
                                   shared_ptr<tcp::endpoint> ep) {
 
     shared_ptr<Call> call(new Call(param, v_class));
+    call->setId(conn->last_call_index++);
+
     shared_ptr<Connection> curr_conn;
 
     if((curr_conn = getConnection(ep, call)) == NULL) {
@@ -197,18 +224,18 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
         return NULL;
     }
 
-    if(!conn->bq_conn_calls.try_push(call)) {
+    if(!conn->addCall(call)) {
         Log::write(ERROR, "FATAL: can not insert call into bq_conn_calls. is it full !?");
         return NULL;
     }
 
-    call->setId(conn->last_call_index++);
     call->setConnection(conn);
 
     return conn;
 }
 
 
+//TODO::move this to connection
 void Client::sendCall(Call* call) {
 
     if(!call->write()) {

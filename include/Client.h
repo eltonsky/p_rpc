@@ -134,20 +134,24 @@ class Client
             shared_ptr<tcp::endpoint> _ep;
             bool _recv_started;
 
-        public:
             std::mutex _mutex_conn;
             std::condition_variable _cond_conn;
 
-            int last_call_index = 0; //only used in Client::getConnection()
-            BlockQueue<shared_ptr<Call>> bq_conn_calls;
+            map<int,shared_ptr<Call>> _calls;
+
+        public:
+
+            int last_call_index = 0;
 
             Connection(shared_ptr<tcp::endpoint>);
             ~Connection();
 
+            bool addCall(shared_ptr<Call>);
+
             bool connect(shared_ptr<tcp::endpoint>,
                          shared_ptr<Call>);
 
-            bool waitForWork(); // not used.
+            bool waitForWork();
 
             void recvRespond(shared_ptr<Call>);
 
