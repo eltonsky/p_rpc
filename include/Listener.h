@@ -22,6 +22,8 @@ namespace Server {
 
 class Listener
 {
+    class Reader;
+
     public:
         bool _should_stop = false;
         static const short num_readers = 2;
@@ -30,6 +32,8 @@ class Listener
         boost::asio::io_service _io_service_disp;
         BlockQueue<std::shared_ptr<tcp::socket>> _bq_acpt_sock;
         int max_accept_conns;
+
+        long last_cleanup_time = 0;
 
         Listener(int port);
 
@@ -44,6 +48,11 @@ class Listener
         void stop();
 
         void join();
+
+        void cleanup_connections();
+
+        void close_connection(shared_ptr<Connection>,
+                                    shared_ptr<tcp::endpoint>);
 
         void handle_read(shared_ptr<tcp::socket> sock,
                          shared_ptr<tcp::endpoint> ep,
@@ -66,6 +75,8 @@ class Listener
 
         boost::thread _t_listener;
 
+        shared_ptr<Reader> _readers[num_readers];
+
         void _do_accept();
 
         //Reader
@@ -74,6 +85,8 @@ class Listener
             BlockQueue<shared_ptr<Connection>> _bq_conn;
             boost::thread _t_reader;
             const short _reader_index;
+
+            Listener* _listener;
 
             void _do_read(shared_ptr<Connection> conn) {
 
@@ -84,16 +97,34 @@ class Listener
                     shared_ptr<Call> s_call = make_shared<Call>(conn);
 
                     if(!s_call->read()){
-                        throw "Failed to read call in Reader";
+                        Log::write(ERROR, "Failed to read call in reader %d from conn %s\n",
+                                   _reader_index, conn->toString().c_str());
+
+                        // close connection
+                        _listener->close_connection(conn, conn->getEndpoint());
+
+                        return;
                     }
 
-                    Log::write(DEBUG, "Reader %d get call %s\n", _reader_index, s_call->toString().c_str());
+                    // set conn contacted timestamp
+                    conn->setLastContact();
+
+                    Log::write(DEBUG, "Reader %d get call %s\n",
+                               _reader_index, s_call->toString().c_str());
 
                     if(!_bq_call.try_push(s_call)) {
-                        throw "FATAL: can not insert call into _bq_call. is it full !?";
+                        Log::write(ERROR, "FATAL: can not insert call into _bq_call!\n");
+                        std::abort();
                     }
 
                     Log::write(INFO, "_bq_call.size() %d\n", _bq_call.size());
+
+                    //put this conn back to listener, in case client sends another call.
+                    conn->getSock()->async_read_some(boost::asio::null_buffers(),
+                        boost::bind(&Listener::handle_read, _listener,
+                                      conn->getSock(), conn->getEndpoint(),
+                                      boost::asio::placeholders::error,
+                                      boost::asio::placeholders::bytes_transferred));
 
                 } catch (exception& e) {
                     Log::write(ERROR, e.what());
@@ -150,9 +181,12 @@ class Listener
                 _t_reader.interrupt();
             }
 
+
+            inline void setListener(Listener* l) { _listener = l; }
+            inline Listener* getListener() { return _listener;}
+
         };
 
-        shared_ptr<Reader> _readers[num_readers];
 };
 
 

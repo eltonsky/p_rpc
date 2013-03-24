@@ -7,11 +7,18 @@ namespace Server{
     std::mutex _mutex_conns;
     std::condition_variable _cond_conns;
     map<shared_ptr<tcp::endpoint>, shared_ptr<Connection>> _connections;
+    long conn_cleanup_interval = 400;
+    int num_connections = 0;
 
     Connection::Connection(shared_ptr<tcp::socket> sock,
                    shared_ptr<tcp::endpoint> ep, int i) :
                    _sock(sock), _ep(ep),
-                   respond_queue(_max_respond_size), index(i) {}
+                   respond_queue(_max_respond_size), index(i) {
+
+        //set last contact in milli secs
+        setLastContact();
+
+    }
 
 
     // write in a async fasion:

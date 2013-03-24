@@ -10,12 +10,22 @@ bool Client::_should_stop = false;
 Client::Connection::Connection(shared_ptr<tcp::endpoint> ep) :
                                 _ep(ep) ,
                                 _recv_started(false),
-                                bq_conn_calls(_max_conn_calls) {}
+                                _should_close(false){}
 
+Client::Connection::Connection(shared_ptr<tcp::endpoint> ep, int index_) :
+                                _ep(ep) ,
+                                _recv_started(false),
+                                _should_close(false),
+                                index{index_} {}
 
 bool Client::Connection::connect(shared_ptr<tcp::endpoint> ep,
                                  shared_ptr<Call> call) {
     try{
+        // if conn is not closed, just use it.
+        if(_should_close || _sock != NULL) {
+            return true;
+        }
+
         _sock = new tcp::socket(_io_service);
 
         _sock->connect(*(ep.get()));
@@ -66,15 +76,16 @@ void Client::Connection::recvStart() {
         recvRespond();
     }
 
+    close();
+
     Log::write(INFO, "Connection receiver thread exits.\n");
 }
 
 
-// bear in mind there's only one thread here playing with _calls
-// from this function, so no lock is need here. great!
 void Client::Connection::recvRespond() {
 
     int recv_call_id = -1;
+    shared_ptr<Call> curr_call;
 
     try{
 
@@ -89,6 +100,8 @@ void Client::Connection::recvRespond() {
 
         Log::write(DEBUG, "recv_call_id is %d\n",recv_call_id);
 
+        _mutex_conn.lock();
+
         map<int,shared_ptr<Call>>::iterator iter= _calls.find(recv_call_id);
 
         if(iter == _calls.end()) {
@@ -96,7 +109,9 @@ void Client::Connection::recvRespond() {
             std::abort();
         }
 
-        shared_ptr<Call> curr_call = iter->second;
+        _mutex_conn.unlock();
+
+        curr_call = iter->second;
 
         shared_ptr<Writable> val = Method::getNewInstance(curr_call->getValueClass());
 
@@ -113,21 +128,35 @@ void Client::Connection::recvRespond() {
 
 // this only returns when either:
 // 1. should stop OR
-// 2. get a call
+// 2. get a call OR
+// 3. wait for more than _max_wait_rep times.
 // return - true : if get a call
-//        - false: if should stop.
+//        - false: if should stop Or
+//                 if wait for more than _max_wait_rep
 bool Client::Connection::waitForWork() {
-    while(1) {
+    int rep = 0;
+    while(rep < _max_wait_rep) {
+
         std::unique_lock<std::mutex> ulock(_mutex_conn);
 
         if(_cond_conn.wait_for(ulock, chrono::milliseconds(_call_wait_time),
             [this] { return _calls.size() > 0; })) {
 
+            // reset rep to 0, and start counting again.
+            // this is to track last active time
+            rep = 0;
+
             return true;
 
         } else if(_should_stop)
             return false;
+
+        rep++;
     }
+
+    // mark connection as closed, as we have been waiting and there is
+    // no call comes
+    markClosed();
 
     return false;
 }
@@ -137,14 +166,19 @@ bool Client::Connection::addCall(shared_ptr<Call> call) {
     std::unique_lock<std::mutex> ulock(_mutex_conn);
 
     try{
-        _calls.insert(pair<int,shared_ptr<Call>(call->getId(),call));
+        int curr_call_id = last_call_index++;
 
-        _cond_conn.notify();
+        call->setId(curr_call_id);
 
-        Log::write(DEBUG, "insert a call to connection, _call.size() %d\n", call->size());
+        _calls.insert(pair<int,shared_ptr<Call>>(curr_call_id,call));
+
+        _cond_conn.notify_one();
+
+        Log::write(DEBUG, "insert call %d to connection, _calls.size() %d\n",
+                   last_call_index - 1, _calls.size());
 
     } catch(...) {
-        Log::write(ERROR, "Failed to insert %s to _calls\n", call->toString());
+        Log::write(ERROR, "Failed to insert %s to _calls\n", call->toString().c_str());
         return false;
     }
 
@@ -152,10 +186,69 @@ bool Client::Connection::addCall(shared_ptr<Call> call) {
 }
 
 
+// ensure only 1 call is sending at a time.
+void Client::Connection::sendCall(Call* call) {
+    std::unique_lock<std::mutex> ulock(_mutex_send_call);
+
+    if(!call->write()) {
+        Log::write(ERROR, "Client::sendCall: Failed\n");
+    }
+}
+
+
+void Client::Connection::markClosed() {
+    bool falseVal = false;
+
+    if(_should_close.compare_exchange_strong(falseVal, true)) {
+        _cond_conn.notify_all();
+    }
+}
+
+
+void Client::Connection::close() {
+    if(_should_close) {
+
+        // close socket
+        boost::system::error_code ec;
+
+        _sock->close(ec);
+
+        delete _sock;
+
+        // remove from client._connections
+        _client->removeConnection(_ep);
+
+        //clear calls
+        cleanupCalls();
+
+        Log::write(DEBUG, "Connection %d is Closed!\n", index);
+    } else {
+        Log::write(INFO,
+            "connection %d is not closed, coz _should_close is not set\n", index);
+    }
+}
+
+
+// Connection is closing, erase all calls associated.
+void Client::Connection::cleanupCalls() {
+    std::unique_lock<std::mutex> ulock(_mutex_conn);
+
+    map<int,shared_ptr<Call>>::iterator iter = _calls.begin();
+
+    while(iter != _calls.end()){
+        _calls.erase(iter->first);
+        iter++;
+    }
+
+}
+/// End of Connection
+
 
 /// Client
 
-Client::Client(){}
+Client::Client(){
+    _last_connection_index = 0;
+}
 
 
 void Client::stop() {
@@ -168,8 +261,6 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
                                   shared_ptr<tcp::endpoint> ep) {
 
     shared_ptr<Call> call(new Call(param, v_class));
-    call->setId(conn->last_call_index++);
-
     shared_ptr<Connection> curr_conn;
 
     if((curr_conn = getConnection(ep, call)) == NULL) {
@@ -179,18 +270,15 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
         return NULL;
     }
 
-    sendCall(call.get());
-
-    Log::write(DEBUG, "curr_conn->bq_conn_calls.size() %d\n",
-               curr_conn->bq_conn_calls.size());
+    curr_conn->sendCall(call.get());
 
     while(!_should_stop && !call->getDone()) {
         call->wait(_call_wait_time);
     }
 
-    // close the underline socket in this conn.
-    // a new socket will be created for a new conn.
-    curr_conn->close();
+//    // close the underline socket in this conn.
+//    // a new socket will be created for a new conn.
+//    curr_conn->close();
 
     return call->getValue();
 }
@@ -207,15 +295,22 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
             _connections.find(ep);
 
         if(iter == _connections.end()) {
-            conn = make_shared<Client::Connection>(ep);
+            conn = make_shared<Client::Connection>(ep, _last_connection_index++);
 
             _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>(ep,conn));
+
+            Log::write(DEBUG, "Create new connection %s\n",
+                       conn->toString().c_str());
+
+            conn->setClient(this);
         } else {
             conn = iter->second;
 
-            Log::write(DEBUG, "Reuse connection obj\n");
+            Log::write(DEBUG, "Reuse connection %s\n",
+                       conn->toString().c_str());
         }
 
+        // only connect if it's not connected
         conn->connect(ep,call);
 
     }catch(exception& e){
@@ -225,7 +320,7 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
     }
 
     if(!conn->addCall(call)) {
-        Log::write(ERROR, "FATAL: can not insert call into bq_conn_calls. is it full !?");
+        Log::write(ERROR, "FATAL: can not insert call into _calls. is it full !?");
         return NULL;
     }
 
@@ -235,11 +330,17 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
 }
 
 
-//TODO::move this to connection
-void Client::sendCall(Call* call) {
+void Client::removeConnection(shared_ptr<tcp::endpoint> ep) {
+    std::unique_lock<std::mutex> ulock(_mutex_client);
 
-    if(!call->write()) {
-        Log::write(ERROR, "Client::sendCall: Failed\n");
+    if(_connections.erase(ep)) {
+        Log::write(ERROR, "Failed to erase connection to <%s:%d>\n",
+                   ep->address().to_string().c_str(),
+                   ep->port());
+    } else {
+        Log::write(INFO, "Erased connection to <%s:%d>\n",
+                   ep->address().to_string().c_str(),
+                   ep->port());
     }
 }
 

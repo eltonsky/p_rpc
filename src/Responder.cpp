@@ -111,17 +111,18 @@ namespace Server{
         //write some, for max throughput
         int res = conn->processResponse(call);
 
-        // close & remove conn after processing a call.
-        // coz a call is associated with a connection anyway, and a connection
-        // is useless afterwareds.
-        conn->close();
-
-        //remove from _connections
-        _mutex_conns.lock();
-
-        _connections.erase(conn->getEndpoint());
-
-        _mutex_conns.unlock();
+///hold it !
+//        // close & remove conn after processing a call.
+//        // coz a call is associated with a connection anyway, and a connection
+//        // is useless afterwareds.
+//        conn->close();
+//
+//        //remove from _connections
+//        _mutex_conns.lock();
+//
+//        _connections.erase(conn->getEndpoint());
+//
+//        _mutex_conns.unlock();
 
         if(res < 0) {
             Log::write(ERROR, "Failed to process a call response <Connection:%d>, <call:%d>\n",

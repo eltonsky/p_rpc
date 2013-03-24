@@ -13,12 +13,14 @@ namespace Server {
 
         for(int i=0; i<num_readers; i++) {
             _readers[i] = shared_ptr<Reader>(new Reader(i, max_reader_queue_size));
+            _readers[i]->setListener(this);
         }
 
         _last_reader_index= -1;
 
-        _acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-        _acceptor.set_option(boost::asio::ip::tcp::acceptor::linger(false,1));
+///not use this
+//        _acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+//        _acceptor.set_option(boost::asio::ip::tcp::acceptor::linger(false,1));
     }
 
 
@@ -61,6 +63,9 @@ namespace Server {
                   boost::asio::placeholders::bytes_transferred));
 
             _do_accept();
+
+            // try to clean up connections not in use
+            //cleanup_connections();
         }
     }
 
@@ -87,19 +92,25 @@ namespace Server {
 
                     _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Connection>>(ep, conn));
 
-                    Log::write(DEBUG, "Create a new connecton.\n");
+                    // incr count of conn
+                    num_connections++;
+
+                    Log::write(DEBUG, "Create a new connecton %s.\n",
+                               conn->toString().c_str());
 
                 } else {
                     conn = iter->second;
 
-                    Log::write(DEBUG, "Reuse an existing connecton.\n");
+                    Log::write(DEBUG, "Reuse an existing connecton %s.\n",
+                               conn->toString().c_str());
                 }
 
                 _mutex_conns.unlock();
 
                 //assign this socket to one of readers, roundrobin
                 if(!addToReader(conn)) {
-                    throw "Readers are all full. Can not add sock";
+                    Log::write(ERROR, "Readers are all full. Can not add sock\n");
+                    std::abort();
                 }
 
             }catch(exception& e){
@@ -178,9 +189,79 @@ namespace Server {
     }
 
 
+    void Listener::cleanup_connections() {
+        if(num_connections == 0)
+            return;
+
+        long current = Utils::getTime();
+
+        if((current - last_cleanup_time) < conn_cleanup_interval) {
+            return;
+        }
+
+        srand (time(NULL));
+        int end = rand() % num_connections;
+        int i = 0;
+
+        Log::write(DEBUG, "rand end is %d\n", end);
+
+        map<shared_ptr<tcp::endpoint>, shared_ptr<Connection>>::iterator iter
+            = _connections.begin();
+
+        try {
+            while(i <= end) {
+                _mutex_conns.lock();
+
+                shared_ptr<Connection> conn = iter->second;
+
+                if(conn->timeOut()) {
+
+                    conn->close();
+
+                    _connections.erase(iter->first);
+
+                    num_connections--;
+
+                    Log::write(DEBUG, "Connection %s timed out, closed it.\n",
+                               conn->toString().c_str());
+                }
+
+                _mutex_conns.unlock();
+
+                iter++;
+                i++;
+            }
+
+            last_cleanup_time = Utils::getTime();
+
+        } catch(...) {
+            Log::write(ERROR, "Failed to cleanup_connections.\n");
+
+            _mutex_conns.unlock();
+        }
+
+    }
+
+
+    void Listener::close_connection(shared_ptr<Connection> conn,
+                                    shared_ptr<tcp::endpoint> ep) {
+         _mutex_conns.lock();
+
+        conn->close();
+
+        _connections.erase(ep);
+
+        num_connections--;
+
+         _mutex_conns.unlock();
+
+         Log::write(DEBUG, "Close connection %s.\n",
+                               conn->toString().c_str());
+    }
+
+
     Listener::~Listener()
     {
-        cout<<"Listener destructor."<<endl;
     }
 
 }

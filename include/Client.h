@@ -111,6 +111,14 @@ class Client
                 return _io_service;
             }
 
+            inline string toString() {
+                stringstream ss;
+                ss << "call id : " << _id;
+                ss << ", value class: " << _valueClass;
+                ss << ", param : " << _param->printToString();
+                return ss.str();
+            }
+
         private:
 
             string _valueClass;
@@ -125,25 +133,35 @@ class Client
         };
 
 
-        //Connection
+        ///Connection
         class Connection {
+            Client* _client;
             boost::thread _t_recv_respond;
             boost::asio::io_service _io_service;
             tcp::socket* _sock;
             const int _max_conn_calls = 100;
+            const int _max_wait_rep = 5;
             shared_ptr<tcp::endpoint> _ep;
             bool _recv_started;
 
+            // sync _calls
             std::mutex _mutex_conn;
             std::condition_variable _cond_conn;
 
+            // sync send_call(), ensure only 1 call is sending from a conn
+            std::mutex _mutex_send_call;
+
             map<int,shared_ptr<Call>> _calls;
+
+            atomic<bool> _should_close;
 
         public:
 
             int last_call_index = 0;
+            int index = -1;
 
             Connection(shared_ptr<tcp::endpoint>);
+            Connection(shared_ptr<tcp::endpoint>,int);
             ~Connection();
 
             bool addCall(shared_ptr<Call>);
@@ -153,21 +171,17 @@ class Client
 
             bool waitForWork();
 
-            void recvRespond(shared_ptr<Call>);
+            void recvRespond();
 
             void recvStart();
 
-            inline void close() {
-                if(_sock != NULL) {
-                    boost::system::error_code ec;
+            void sendCall(Call* call);
 
-                    _sock->close(ec);
+            void markClosed();
 
-                    delete _sock;
+            void close();
 
-                    Log::write(DEBUG, "close _sock status : %s\n", ec.message().c_str());
-                }
-            }
+            void cleanupCalls();
 
             inline string toString() {
                 stringstream ss;
@@ -180,10 +194,14 @@ class Client
             inline tcp::socket* getSock() const{
                 return _sock;
             }
+
+            inline const Client* getClient() {return _client;}
+            inline void setClient(Client* c) {_client = c;}
         };
+        ///End of Connection
 
 
-        int _last_connection_index = 0;
+        atomic<int> _last_connection_index;
         const int _max_connection_num = 32768;
         map<shared_ptr<tcp::endpoint>,shared_ptr<Connection>> _connections;
 
@@ -200,8 +218,6 @@ class Client
 
         Client();
 
-        void sendCall(Call* call);
-
         shared_ptr<Writable> call(shared_ptr<Writable> param,
                                   string value_class,
                                   shared_ptr<tcp::endpoint>);
@@ -212,6 +228,8 @@ class Client
 
         shared_ptr<Connection> getConnection(shared_ptr<tcp::endpoint>,
                                              shared_ptr<Call>);
+
+        void removeConnection(shared_ptr<tcp::endpoint>);
 
         ~Client();
 };
