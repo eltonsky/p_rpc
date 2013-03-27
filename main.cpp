@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 
 
             Test2 t2;
-            t2.test20(server_host, port, 1, 1000);
+            t2.test20(server_host, port, 32, 50);
 
         } else {
 

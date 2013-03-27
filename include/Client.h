@@ -203,7 +203,7 @@ class Client
 
         atomic<int> _last_connection_index;
         const int _max_connection_num = 32768;
-        map<shared_ptr<tcp::endpoint>,shared_ptr<Connection>> _connections;
+        map<string,shared_ptr<Connection>> _connections;
 
         shared_ptr<tcp::endpoint> _client_ep;
         const int _max_client_calls = 100;

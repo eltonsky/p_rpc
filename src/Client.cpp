@@ -88,7 +88,6 @@ void Client::Connection::recvRespond() {
     shared_ptr<Call> curr_call;
 
     try{
-
         size_t l = boost::asio::read(*(_sock),
             boost::asio::buffer(&recv_call_id, sizeof(recv_call_id)));
 
@@ -110,6 +109,8 @@ void Client::Connection::recvRespond() {
         }
 
         _mutex_conn.unlock();
+
+        Log::write(DEBUG, "Found call for call id %d\n", recv_call_id);
 
         curr_call = iter->second;
 
@@ -221,10 +222,10 @@ void Client::Connection::close() {
         //clear calls
         cleanupCalls();
 
-        Log::write(DEBUG, "Connection %d is Closed!\n", index);
+        Log::write(DEBUG, "!! Close Connection %d !!\n", index);
     } else {
         Log::write(INFO,
-            "connection %d is not closed, coz _should_close is not set\n", index);
+            "!! connection %d is not closed, coz _should_close is not set\n", index);
     }
 }
 
@@ -276,6 +277,7 @@ shared_ptr<Writable> Client::call(shared_ptr<Writable> param,
         call->wait(_call_wait_time);
     }
 
+/// a connection won't be closed here. It's only closed when idle for a while.
 //    // close the underline socket in this conn.
 //    // a new socket will be created for a new conn.
 //    curr_conn->close();
@@ -291,13 +293,16 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
     shared_ptr<Client::Connection> conn;
 
     try{
-        map<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>::iterator iter =
-            _connections.find(ep);
+        stringstream ss;
+        ss<<ep->address().to_string()<<":"<<ep->port();
+
+        map<string,shared_ptr<Client::Connection>>::iterator iter =
+            _connections.find(ss.str());
 
         if(iter == _connections.end()) {
             conn = make_shared<Client::Connection>(ep, _last_connection_index++);
 
-            _connections.insert(pair<shared_ptr<tcp::endpoint>,shared_ptr<Client::Connection>>(ep,conn));
+            _connections.insert(pair<string,shared_ptr<Client::Connection>>(ss.str(),conn));
 
             Log::write(DEBUG, "Create new connection %s\n",
                        conn->toString().c_str());
@@ -333,7 +338,10 @@ shared_ptr<Client::Connection> Client::getConnection(shared_ptr<tcp::endpoint> e
 void Client::removeConnection(shared_ptr<tcp::endpoint> ep) {
     std::unique_lock<std::mutex> ulock(_mutex_client);
 
-    if(_connections.erase(ep)) {
+    stringstream ss;
+    ss<<ep->address().to_string()<<":"<<ep->port();
+
+    if(_connections.erase(ss.str())) {
         Log::write(ERROR, "Failed to erase connection to <%s:%d>\n",
                    ep->address().to_string().c_str(),
                    ep->port());

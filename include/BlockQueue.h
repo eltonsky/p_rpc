@@ -16,8 +16,8 @@ using namespace std;
 template <typename T> class BlockQueue
 {
     unsigned max_size = 0;
-    const int prod_wait_time = 100;
-    const int cons_wait_time = 100;
+    const int prod_wait_time = 30;
+    const int cons_wait_time = 30;
 
     // use a dequeue for insert at both ends
     std::deque<T> queue_;
@@ -50,7 +50,7 @@ public:
         Log::write(DEBUG, "try_push: queue size %d, max_size %d\n",queue_.size(),max_size);
 
         if(cond_is_full.wait_for(l, chrono::milliseconds(prod_wait_time),
-                [this] { return queue_.size() != max_size; })) {
+                [this] { return queue_.size() < max_size; })) {
 
             bool wake = queue_.empty(); // we may need to wake consumer
 
@@ -71,14 +71,16 @@ public:
 
 
     void push(T const &val) {
-        while(!try_push(val))
+        while(!try_push(val)){
             this_thread::sleep_for(chrono::milliseconds(prod_wait_time));
+        }
     }
 
 
     void push_front(T const &val) {
-        while(!try_push(val, false))
+        while(!try_push(val, false)){
             this_thread::sleep_for(chrono::milliseconds(prod_wait_time));
+        }
     }
 
 
@@ -110,14 +112,28 @@ public:
 
 
     T pop() {
+        unilock l(mutex_);
+
         T ret;
 
-        while(_pop(ret) == false) {
-            this_thread::sleep_for(chrono::milliseconds(cons_wait_time));
+        while(true) {
+            if(cond_is_empty.wait_for(l, chrono::milliseconds(cons_wait_time),
+                    [this] { return queue_.size() > 0; })) {
+
+                ret = queue_.front();
+                queue_.pop_front();
+
+                if(queue_.size() == max_size - 1)
+                    cond_is_full.notify_one();
+
+                break;
+            }
+
         }
 
         return ret;
     }
+
 
 };
 

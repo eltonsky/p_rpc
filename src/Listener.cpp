@@ -6,7 +6,6 @@ using namespace std;
 namespace Server {
 
     Listener::Listener(int port) :
-        _bq_acpt_sock(max_accept_conns),
         _acceptor(_io_service_listener,tcp::endpoint(tcp::v4(), port))  {
 
         _port = port;
@@ -17,10 +16,6 @@ namespace Server {
         }
 
         _last_reader_index= -1;
-
-///not use this
-//        _acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-//        _acceptor.set_option(boost::asio::ip::tcp::acceptor::linger(false,1));
     }
 
 
@@ -128,7 +123,7 @@ namespace Server {
 
         while(retry_times < num_readers) {
             if(_readers[_last_reader_index].get()->add(conn)) {
-                Log::write(DEBUG, "added to reader,  _last_reader_index %d\n",
+                Log::write(DEBUG, "added to reader %d\n",
                             _last_reader_index);
 
                 return true;
