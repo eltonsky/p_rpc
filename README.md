@@ -13,17 +13,14 @@ Server side is a pipeline with 4 stages :
 
   Listener: accept connections from client, add socket to one of the readers queue when the sock is ready to read
   
-  |
   V
   
   Reader(s): read a call from client socket and add the call to one of the handlers' queue.
   
-  |
   V
   
   Handler: execute the call and add the result to responder queue
   
-  |
   V
   
   Responder: send the result to client
